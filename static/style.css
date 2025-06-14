@@ -1,0 +1,149 @@
+/*
+ * Custom Styles for BudgetApp Layout
+ * These styles control the sidebar's appearance and behavior,
+ * and adjust the main content area accordingly.
+ */
+
+body {
+    /* Ensures full height and allows for flexible box layout */
+    display: flex;
+    min-height: 100vh; /* Minimum height of the viewport */
+    flex-direction: column; /* Stacks children vertically */
+    overflow-x: hidden; /* Prevents horizontal scrollbar when sidebar is off-screen */
+}
+
+.sidebar {
+    /* Positioning the sidebar off-screen to the left by default */
+    position: fixed;
+    top: 0;
+    left: -250px; /* Hides the sidebar by moving it outside the viewport */
+    width: 250px; /* Fixed width of the sidebar */
+    height: 100%;
+    background-color: #343a40; /* Dark background color */
+    padding-top: 60px; /* Space for the navbar when sidebar is open */
+    transition: all 0.3s ease; /* Smooth transition for opening/closing */
+    z-index: 1040; /* Higher z-index than navbar to appear on top */
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Subtle shadow for depth */
+}
+
+.sidebar.active {
+    /* When active, move the sidebar into view */
+    left: 0;
+}
+
+.sidebar .nav-link {
+    /* Styling for sidebar navigation links */
+    color: #ffffff; /* White text color */
+    padding: 15px 20px; /* Padding for links */
+    display: block; /* Make links block level */
+    border-radius: 0.375rem; /* Slightly rounded corners */
+    margin: 5px 10px; /* Margin around links */
+    transition: background-color 0.2s ease; /* Smooth hover transition */
+}
+
+.sidebar .nav-link:hover {
+    /* Hover effect for sidebar links */
+    background-color: #495057; /* Darker background on hover */
+    color: #ffffff; /* Ensure text remains white on hover */
+}
+
+.sidebar .nav-link i {
+    /* Icon styling in sidebar links */
+    margin-right: 10px; /* Space between icon and text */
+}
+
+.main-content-wrapper {
+    /*
+     * Wrapper for main content to allow shifting when sidebar is active.
+     * This helps push content to the right without affecting sidebar's fixed position.
+     */
+    flex-grow: 1; /* Allows main content to take up available space */
+    transition: margin-left 0.3s ease; /* Smooth transition for content shift */
+    margin-left: 0; /* No margin by default */
+}
+
+.main-content-wrapper.shifted {
+    /* When sidebar is active, shift the main content to the right */
+    margin-left: 250px; /* Matches sidebar width */
+}
+
+/* Navbar specific styles */
+.navbar-toggler-sidebar {
+    /* Styling for the sidebar toggle button within the navbar */
+    border: none; /* No border */
+    background-color: transparent; /* Transparent background */
+    color: #ffffff; /* White icon color */
+    font-size: 1.5rem; /* Larger icon size */
+    margin-right: 15px; /* Space between button and app name */
+    padding: 0; /* Remove default button padding */
+}
+
+.navbar-toggler-sidebar:focus {
+    /* Outline removal on focus */
+    box-shadow: none;
+}
+
+/* Ensures the footer stays at the bottom */
+.footer {
+    flex-shrink: 0; /* Prevents footer from shrinking */
+}
+
+/* Custom styles for the alerts modal to position it at the top-right */
+#alertsModal .modal-dialog {
+    position: fixed; /* Fixed position relative to the viewport */
+    top: 60px; /* Adjust based on your navbar height */
+    right: 20px; /* Distance from the right edge */
+    margin: 0; /* Remove default modal margin */
+    transform: none; /* Override any centering transforms */
+    max-width: 450px; /* Limit the width for a better notification look */
+    width: 90%; /* Responsive width */
+    pointer-events: none; /* Allows clicks to pass through when not active/hovered */
+    background-color: transparent; /* Make background transparent */
+    box-shadow: none; /* Remove default modal shadow */
+}
+
+#alertsModal.show .modal-dialog {
+    pointer-events: auto; /* Enable clicks when modal is shown */
+}
+
+#alertsModal .modal-content {
+    background-color: #ffffff; /* White background for the content box */
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* Re-add shadow to the content box */
+}
+
+/* Floating Action Button (FAB) styles */
+.financial-advice-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1030; /* Below modals, above most content */
+    padding: 15px 25px; /* Adjust padding for button size */
+    font-size: 1.1rem; /* Adjust font size */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add stronger shadow */
+    transition: transform 0.2s ease-in-out;
+}
+
+.financial-advice-fab:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+
+/* Further adjustments for responsiveness if needed */
+@media (max-width: 767.98px) {
+    #alertsModal .modal-dialog {
+        top: auto; /* Remove fixed top for smaller screens */
+        bottom: 1rem; /* Position at bottom for better mobile UX */
+        left: 1rem;
+        right: 1rem;
+        max-width: none; /* Allow full width */
+        width: auto;
+    }
+
+    .financial-advice-fab {
+        bottom: 15px;
+        right: 15px;
+        padding: 12px 20px; /* Smaller padding on mobile */
+        font-size: 1rem; /* Smaller font on mobile */
+    }
+}

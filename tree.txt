@@ -1,0 +1,22 @@
+smart_budget/
+│
+├── app.py                   # Main Flask app
+├── requirements.txt         # Dependencies
+├── helpers.py               # Custom utility functions
+│
+├── static/                  # Static files (CSS, JS, images)
+│   ├── styles.css
+│   └── script.js
+│
+├── templates/               # HTML files (Jinja templates)
+│   ├── layout.html          # Base layout
+│   ├── index.html           # Dashboard
+│   ├── login.html
+│   ├── register.html
+│   ├── budget.html          # Add/view budget
+│   ├── expenses.html        # Add/view expenses
+│   └── compare.html         # Comparison summary
+│
+├── database.db              # SQLite database file
+│
+└── README.md                # Project description/instructions

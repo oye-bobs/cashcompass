@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Edit Profile
+{% endblock %}
+
+{% block main %}
+    <div class="container py-8">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <div class="card-header bg-primary text-white text-center py-4 rounded-top-lg">
+                        <i class="fas fa-edit fa-4x mb-3"></i> {# Edit icon from Font Awesome #}
+                        <h2 class="h3 mb-0 text-white fw-bold">Edit Your Profile</h2>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-5">
+                            <p class="text-muted mb-0">Update your username and email address.</p>
+                        </div>
+
+                        <form action="/profile/edit" method="post">
+                            <div class="form-floating mb-3">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="username"
+                                    name="username"
+                                    placeholder="Username"
+                                    value="{{ user.username | default('') }}" {# Pre-fill with current username #}
+                                    required
+                                    autocomplete="off"
+                                    autofocus
+                                >
+                                <label for="username">Username</label>
+                            </div>
+                            <div class="form-floating mb-4">
+                                <input
+                                    type="email" {# Use type="email" for better validation #}
+                                    class="form-control"
+                                    id="email"
+                                    name="email"
+                                    placeholder="Email"
+                                    value="{{ user.email | default('') }}" {# Pre-fill with current email #}
+                                    required
+                                    autocomplete="off"
+                                >
+                                <label for="email">Email</label>
+                            </div>
+                            <div class="d-grid gap-3">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i> Save Changes
+                                </button>
+                                <a href="/profile" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i> Back to Profile
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

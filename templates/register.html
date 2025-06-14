@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0"> {# Using Bootstrap card with subtle shadow and no default border #}
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="mb-4 text-center text-primary fw-bold">Create an Account</h2> {# Bootstrap primary text for brand #}
+                    <form action="/register" method="post" novalidate>
+                        <div class="form-floating mb-3"> {# Bootstrap's floating label #}
+                            <input
+                                type="text"
+                                class="form-control" {# Standard Bootstrap form control #}
+                                id="username"
+                                name="username"
+                                placeholder="Username" {# Placeholder for floating label #}
+                                autocomplete="off"
+                                autofocus
+                                required
+                            >
+                            <label for="username">Username</label>
+                        </div>
+                        <div class="form-floating mb-3"> {# Bootstrap's floating label #}
+                            <input
+                                type="password"
+                                class="form-control" {# Standard Bootstrap form control #}
+                                id="password"
+                                name="password"
+                                placeholder="Password" {# Placeholder for floating label #}
+                                required
+                            >
+                            <label for="password">Password</label>
+                        </div>
+                        <div class="form-floating mb-4"> {# Bootstrap's floating label #}
+                            <input
+                                type="password"
+                                class="form-control" {# Standard Bootstrap form control #}
+                                id="confirmation"
+                                name="confirmation"
+                                placeholder="Confirm Password" {# Placeholder for floating label #}
+                                required
+                            >
+                            <label for="confirmation">Confirm Password</label>
+                        </div>
+                        <div class="d-grid"> {# Bootstrap's d-grid for full-width button #}
+                            <button type="submit" class="btn btn-primary btn-lg">Register</button> {# Standard Bootstrap primary button #}
+                        </div>
+                    </form>
+                    <div class="text-center mt-4">
+                        <p class="text-muted">Already have an account? <a href="/login" class="text-decoration-none">Log in here</a></p> {# Bootstrap text-muted and text-decoration-none #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

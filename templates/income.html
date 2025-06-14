@@ -1,0 +1,265 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Income
+{% endblock %}
+
+{% block main %}
+    <div class="row"> {# Changed from container py-8 to row for consistent layout #}
+        <!-- Left Half: Add Income Form -->
+        <div class="col-md-6">
+            <div class="card shadow-sm"> {# Removed border-0 h-100 for consistent card styling #}
+                <div class="card-header bg-primary text-white"> {# Matched budget/expenses.html card-header style #}
+                    <h5 class="card-title mb-0">Add New Income Item</h5> {# Matched budget/expenses.html h5 and mb-0 #}
+                </div>
+                <div class="card-body"> {# Removed p-4 p-md-5 for consistent card-body padding #}
+                    <form action="/income" method="post" autocomplete="off">
+                        <div class="mb-3">
+                            <label for="source" class="form-label">Source</label> {# Removed text-muted #}
+                            <input
+                                id="source"
+                                name="source"
+                                type="text"
+                                class="form-control"
+                                placeholder="e.g., Salary, Freelance, Gift"
+                                required
+                                autocomplete="off"
+                            >
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label> {# Removed (₦) and text-muted #}
+                            <div class="input-group"> {# Added input-group for currency symbol #}
+                                <span class="input-group-text">$</span> {# Changed to $ for consistency #}
+                                <input
+                                    id="amount"
+                                    name="amount"
+                                    type="number"
+                                    min="1"
+                                    step="0.01"
+                                    class="form-control"
+                                    placeholder="Enter amount (e.g., 500)" {# Updated placeholder #}
+                                    required
+                                    autocomplete="off"
+                                >
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="income-date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="income-date" name="date" value="{{ current_date_iso }}" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100"> {# Changed to btn-success w-100 #}
+                            <i class="fas fa-plus-circle"></i> Add Income
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Half: Income Overview Table -->
+        <div class="col-md-6">
+            <div class="card shadow-sm"> {# Removed border-0 h-100 for consistent card styling #}
+                <div class="card-header bg-primary text-white"> {# Matched budget/expenses.html card-header style #}
+                    <h5 class="card-title mb-0">Income Overview for {{ selected_month_display }}</h5> {# Dynamic title #}
+                </div>
+                <div class="card-body"> {# Removed p-4 p-md-5 for consistent card-body padding #}
+                    <div class="d-flex justify-content-end mb-3">
+                        <form action="/income" method="get" class="d-flex">
+                            <label for="view-month-select" class="form-label me-2 my-auto">View Month:</label>
+                            <select name="month" id="view-month-select" class="form-select me-2" onchange="this.form.submit()">
+                                {% for month_val, month_label in available_months %}
+                                    <option value="{{ month_val }}" {% if month_val == selected_month %}selected{% endif %}>
+                                        {{ month_label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+
+                    {% if income_items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover"> {# Changed from table-striped table-hover to table-hover #}
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Source</th>
+                                        <th scope="col" class="text-end">Amount ($)</th> {# Changed to $ #}
+                                        <th scope="col" class="text-end">Date</th> {# Added Date column #}
+                                        <th scope="col" class="text-end">Actions</th> {# Added Actions column #}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in income_items %}
+                                        <tr>
+                                            <td>{{ item.source }}</td>
+                                            <td class="text-end">${{ "%.2f" | format(item.amount) }}</td> {# Changed to $ #}
+                                            <td class="text-end">
+                                                {% if item.date %}
+                                                    {# Using the custom filter for MM/YYYY format #}
+                                                    {{ item.date | to_datetime | default(item.date, true) | date_format('%m/%Y') }}
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <!-- Edit Button (Triggers Modal) -->
+                                                <button class="btn btn-sm btn-outline-primary edit-income-btn"
+                                                        data-bs-toggle="modal" data-bs-target="#editIncomeModal"
+                                                        data-id="{{ item.id }}"
+                                                        data-source="{{ item.source }}"
+                                                        data-amount="{{ item.amount }}"
+                                                        data-date="{{ item.date | default('') }}" {# Pass date to modal #}
+                                                        title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <!-- Delete Button (Triggers Confirmation) -->
+                                                <button class="btn btn-sm btn-outline-danger delete-income-btn"
+                                                        data-id="{{ item.id }}"
+                                                        data-source="{{ item.source }}"
+                                                        title="Delete"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="table-light"> {# Changed from table-primary to table-light for consistency #}
+                                    <tr class="fw-bold">
+                                        <td>Total Income for {{ selected_month_display }}:</td> {# Dynamic total #}
+                                        <td class="text-end">${{ "%.2f" | format(total_income) }}</td> {# Changed to $ #}
+                                        <td></td> {# Empty cell for date column #}
+                                        <td></td> {# Empty cell for actions column #}
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No income items added for {{ selected_month_display }} yet. Use the form on the left to add your first income!</p> {# Updated text #}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Edit Income Modal -->
+<div class="modal fade" id="editIncomeModal" tabindex="-1" aria-labelledby="editIncomeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editIncomeModalLabel">Edit Income Item</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editIncomeForm" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="editIncomeId" name="id">
+                    <div class="mb-3">
+                        <label for="editSource" class="form-label">Source</label>
+                        <input type="text" class="form-control" id="editSource" name="source" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAmount" class="form-label">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="editAmount" name="amount" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editIncomeDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="editIncomeDate" name="date" required> {# New date input #}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal (Reusing ID but content is specific to income) -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the income item for "<span id="deleteSourceSpan"></span>"? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteIncomeForm" method="post" style="display:inline;">
+                    <input type="hidden" id="deleteIncomeId" name="id">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle Edit Income Button Click to populate modal
+        const editIncomeModal = document.getElementById('editIncomeModal');
+        if (editIncomeModal) { // Check if the modal exists before adding listener
+            editIncomeModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const id = button.getAttribute('data-id');
+                const source = button.getAttribute('data-source');
+                const amount = button.getAttribute('data-amount');
+                const date = button.getAttribute('data-date'); // Get the date
+
+                // Update the modal's content
+                const modalTitle = editIncomeModal.querySelector('.modal-title');
+                const editIncomeId = editIncomeModal.querySelector('#editIncomeId');
+                const editSourceInput = editIncomeModal.querySelector('#editSource');
+                const editAmountInput = editIncomeModal.querySelector('#editAmount');
+                const editIncomeDateInput = editIncomeModal.querySelector('#editIncomeDate'); // Get date input
+                const editIncomeForm = editIncomeModal.querySelector('#editIncomeForm');
+
+                modalTitle.textContent = 'Edit Income Item: ' + source;
+                editIncomeId.value = id;
+                editSourceInput.value = source;
+                editAmountInput.value = parseFloat(amount).toFixed(2); // Ensure two decimal places
+
+                // Format date for input[type="date"]
+                if (date) {
+                    // Ensure date is in YYYY-MM-DD format for the input[type="date"]
+                    editIncomeDateInput.value = new Date(date).toISOString().split('T')[0];
+                } else {
+                    editIncomeDateInput.value = ''; // Clear if no date
+                }
+
+                // Set the form action dynamically
+                editIncomeForm.action = `/income/edit/${id}`; // Assuming Flask route like /income/edit/<id>
+            });
+        }
+
+        // Handle Delete Income Button Click to populate confirmation modal
+        const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
+        if (deleteConfirmationModal) { // Check if the modal exists before adding listener
+            deleteConfirmationModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const id = button.getAttribute('data-id');
+                const source = button.getAttribute('data-source');
+
+                // Update the modal's content
+                const deleteSourceSpan = deleteConfirmationModal.querySelector('#deleteSourceSpan');
+                const deleteIncomeId = deleteConfirmationModal.querySelector('#deleteIncomeId');
+                const deleteIncomeForm = deleteConfirmationModal.querySelector('#deleteIncomeForm');
+
+                deleteSourceSpan.textContent = source;
+                deleteIncomeId.value = id;
+
+                // Set the form action dynamically
+                deleteIncomeForm.action = `/income/delete/${id}`; // Assuming Flask route like /income/delete/<id>
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> {# Font Awesome for icons #}
+{% endblock %}

@@ -1,0 +1,394 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block main %}
+    <div class="container py-4">
+        <h2 class="text-3xl font-bold text-center text-dark mb-4">Your Financial Dashboard</h2>
+
+        {# Month Selector - Moved to the top #}
+        <div class="d-flex justify-content-end mb-4"> {# Added mb-4 for spacing below selector #}
+            <form action="/" method="get" class="d-flex">
+                <label for="month-select" class="form-label me-2 my-auto">Select Month:</label>
+                <select name="month" id="month-select" class="form-select me-2" onchange="this.form.submit()">
+                    {% for month_val, month_label in available_months %}
+                        <option value="{{ month_val }}" {% if month_val == selected_month %}selected{% endif %}>
+                            {{ month_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        {# Summary Cards #}
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <a href="/income" class="text-decoration-none d-block"> {# Added anchor tag #}
+                    <div class="card shadow-sm text-center p-3 bg-info text-white rounded-lg h-100"> {# Added h-100 for consistent height #}
+                        <h5>Total Income</h5>
+                        <p class="fs-4">${{ "%.2f" | format(total_income) }}</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/expenses" class="text-decoration-none d-block"> {# Added anchor tag #}
+                    <div class="card shadow-sm text-center p-3 bg-danger text-white rounded-lg h-100"> {# Added h-100 for consistent height #}
+                        <h5>Total Expenses</h5>
+                        <p class="fs-4">${{ "%.2f" | format(total_expenses) }}</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm text-center p-3 bg-success text-white rounded-lg">
+                    <h5>Net Balance</h5>
+                    <p class="fs-4">${{ "%.2f" | format(net_balance) }}</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <a href="/savings" class="text-decoration-none d-block"> {# Added anchor tag #}
+                    <div class="card shadow-sm text-center p-3 bg-warning text-dark rounded-lg h-100"> {# Added h-100 for consistent height #}
+                        <h5>Total Savings</h5>
+                        <p class="fs-4">${{ "%.2f" | format(total_savings) }}</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {# Button to Savings Dashboard #}
+        <div class="text-center mb-4">
+            <a href="/savings_dashboard" class="btn btn-primary btn-lg">
+                <i class="fas fa-chart-line me-2"></i> View Savings & Financial Health Overview
+            </a>
+        </div>
+
+
+        <div class="row g-4">
+            {# Budget vs. Actual Spending - Bar Chart & List #}
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100 rounded-lg">
+                    <div class="card-header bg-primary text-white rounded-t-lg">
+                        <h5 class="card-title mb-0">Budget vs. Actual Spending for {{ selected_month_display }}</h5> {# Updated title #}
+                    </div>
+                    <div class="card-body d-flex flex-column"> {# Added d-flex flex-column for better control #}
+                        {# Check if budget_bar_labels is not empty for rendering the chart and list #}
+                        {% if budget_bar_labels %}
+                            {# Added a div to control the canvas height #}
+                            <div style="position: relative; height: 300px; width: 100%;">
+                                <canvas id="budgetVsActualChart"></canvas>
+                            </div>
+                            <hr class="my-4">
+                            <h6 class="mb-3">Detailed Breakdown:</h6>
+                            <ul class="list-group list-group-flush flex-grow-1 overflow-auto"> {# flex-grow-1 and overflow-auto to make list scrollable if too long #}
+                                {% for category, data in budget_vs_actual.items() %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ category }}</strong>
+                                        <small class="text-muted d-block">Budgeted: ${{ "%.2f" | format(data.budgeted) }}</small>
+                                    </div>
+                                    <span class="fs-6">
+                                        Spent: ${{ "%.2f" | format(data.spent) }} |
+                                        Remaining: ${{ "%.2f" | format(data.remaining) }}
+                                        {% if data.remaining < 0 %}
+                                            <span class="badge bg-danger ms-2">Over Budget</span>
+                                        {% elif data.spent > 0 and data.remaining > 0 %}
+                                            <span class="badge bg-warning ms-2">Progress</span>
+                                        {% endif %}
+                                    </span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-4">No budget or expense data available for {{ selected_month_display }}.</p> {# Updated text #}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {# Top Spending Categories - Pie Chart #}
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100 rounded-lg">
+                    <div class="card-header bg-primary text-white rounded-t-lg">
+                        <h5 class="card-title mb-0">Top Spending Categories for {{ selected_month_display }}</h5> {# Updated title #}
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        {% if pie_chart_data %}
+                            <div class="w-100" style="max-width: 500px; max-height: 500px;"> {# Increased max-width and max-height #}
+                                <canvas id="topExpensesPieChart" width="500" height="500"></canvas> {# Increased canvas dimensions #}
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-4">No expense data available to display categories for {{ selected_month_display }}.</p> {# Updated text #}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Income vs. Expenses - Line Chart #}
+        <div class="row g-4 mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm h-100 rounded-lg">
+                    <div class="card-header bg-primary text-white rounded-t-lg">
+                        <h5 class="card-title mb-0">Income vs. Expenses for {{ selected_month_display }}</h5> {# Updated title for clarity and dynamic month #}
+                    </div>
+                    <div class="card-body">
+                        {# Display total income and expense for the month #}
+                        <div class="mb-3 d-flex justify-content-around">
+                            <span class="badge bg-info text-white p-2 mx-1 fs-6">
+                                Total Income: ${{ "%.2f" | format(monthly_income_total) }}
+                            </span>
+                            <span class="badge bg-danger text-white p-2 mx-1 fs-6">
+                                Total Expenses: ${{ "%.2f" | format(monthly_expenses_total) }}
+                            </span>
+                        </div>
+
+                        {% if line_chart_labels and (monthly_income_total > 0 or monthly_expenses_total > 0) %}
+                            <div style="position: relative; height: 350px; width: 100%;">
+                                <canvas id="monthlyIncomeExpensesChart"></canvas>
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-4">No income or expense data available for {{ selected_month_display }}.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data passed from Flask backend
+            const budgetBarLabels = JSON.parse('{{ budget_bar_labels | tojson }}');
+            const budgetedData = JSON.parse('{{ budgeted_data | tojson }}');
+            const spentData = JSON.parse('{{ spent_data | tojson }}');
+            const pieChartLabels = JSON.parse('{{ pie_chart_labels | tojson }}');
+            const pieChartData = JSON.parse('{{ pie_chart_data | tojson }}');
+            const lineChartLabels = JSON.parse('{{ line_chart_labels | tojson }}');
+            const lineChartIncomeData = JSON.parse('{{ line_chart_income_data | tojson }}');
+            const lineChartExpensesData = JSON.parse('{{ line_chart_expenses_data | tojson }}');
+
+
+            // --- Budget vs. Actual Bar Chart ---
+            const budgetCtx = document.getElementById('budgetVsActualChart');
+            if (budgetCtx) {
+                new Chart(budgetCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: budgetBarLabels,
+                        datasets: [
+                            {
+                                label: 'Budgeted',
+                                data: budgetedData,
+                                backgroundColor: 'rgba(75, 192, 192, 0.6)', // Teal
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Spent',
+                                data: spentData,
+                                backgroundColor: 'rgba(255, 99, 132, 0.6)', // Red
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Important for controlling height via parent container
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount ($)',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.08)' // Lighter grid lines
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.08)' // Lighter grid lines
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: false, // Title handled by card-header
+                            },
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: { // Added tooltips for better data on hover
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Top Expenses Pie Chart ---
+            const pieCtx = document.getElementById('topExpensesPieChart');
+            if (pieCtx && pieChartData.length > 0) {
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: pieChartLabels,
+                        datasets: [{
+                            data: pieChartData,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.8)', // Red
+                                'rgba(54, 162, 235, 0.8)', // Blue
+                                'rgba(255, 206, 86, 0.8)', // Yellow
+                                'rgba(75, 192, 192, 0.8)', // Green
+                                'rgba(153, 102, 255, 0.8)',// Purple
+                                'rgba(255, 159, 64, 0.8)' // Orange
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Important for controlling height via parent container
+                        plugins: {
+                            title: {
+                                display: false, // Title handled by card-header
+                            },
+                            legend: {
+                                position: 'right', // Or 'top', 'bottom', 'left'
+                            },
+                            tooltip: { // Added tooltips
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Income vs. Expenses Line Chart ---
+            const lineCtx = document.getElementById('monthlyIncomeExpensesChart');
+            // Condition for displaying chart: must have labels AND at least one of the totals must be > 0
+            if (lineCtx && lineChartLabels.length > 0) {
+                new Chart(lineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: lineChartLabels,
+                        datasets: [
+                            {
+                                label: 'Income',
+                                data: lineChartIncomeData,
+                                borderColor: '#007BFF', // Blue
+                                backgroundColor: 'rgba(0, 123, 255, 0.3)', // Semi-transparent Blue for fill
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 5,
+                                pointBackgroundColor: '#007BFF',
+                                pointBorderColor: '#fff',
+                                pointHoverRadius: 7,
+                                pointHoverBackgroundColor: '#007BFF',
+                                pointHoverBorderColor: '#fff',
+                            },
+                            {
+                                label: 'Expenses',
+                                data: lineChartExpensesData,
+                                borderColor: '#DC3545', // Red
+                                backgroundColor: 'rgba(220, 53, 69, 0.3)', // Semi-transparent Red for fill
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 5,
+                                pointBackgroundColor: '#DC3545',
+                                pointBorderColor: '#fff',
+                                pointHoverRadius: 7,
+                                pointHoverBackgroundColor: '#DC3545',
+                                pointHoverBorderColor: '#fff',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount ($)',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.08)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.08)'
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: false,
+                            },
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

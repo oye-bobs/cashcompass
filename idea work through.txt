@@ -1,0 +1,27 @@
+✅ Your Final Project Idea (Refined)
+💰 Smart Budget & Spending Tracker
+A personal finance web app where users:
+
+Set budgets for categories (e.g., Food: ₦30,000/month)
+
+Log actual expenses
+
+Get alerted when spending nears/exceeds the budget
+
+Visualize performance with simple charts
+
+🔍 Key Features
+✅ MVP (Doable for CS50)
+User registration/login
+
+Create a monthly budget with categories and limits
+
+Add expenses to categories
+
+See how much you’ve spent vs. your budget (percentage)
+
+Visual indicators:
+
+Green (safe), Yellow (near limit), Red (exceeded)
+
+Dashboard summary: e.g., “You’ve spent ₦28,000 of your ₦30,000 Food budget.”
