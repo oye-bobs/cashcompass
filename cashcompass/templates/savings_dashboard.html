@@ -1,0 +1,299 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Savings Dashboard
+{% endblock %}
+
+{% block main %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/savings_dashboard.css') }}">
+
+    <div class="container py-4">
+        <h2 class="text-3xl font-bold text-center text-gradient mb-5">Your Financial Health Overview</h2>
+
+        <div class="row g-4 mb-5">
+            {# Financial Health Score Speedometer Card #}
+            <div class="col-lg-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect text-center p-4">
+                    <div class="card-header card-header-gradient py-3 mb-4 rounded-t-xl">
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-heartbeat me-2"></i> Financial Health Score</h5>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <div class="speedometer-container">
+                            <canvas id="healthScoreSpeedometer" width="300" height="150"></canvas>
+                            {# The score text is now drawn by JavaScript directly on the canvas #}
+                        </div>
+                        <p class="score-label">Overall Score</p>
+                    </div>
+                </div>
+            </div>
+
+            {# Key Financial Metrics Card #}
+            <div class="col-lg-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect p-4">
+                    <div class="card-header card-header-gradient py-3 mb-4 rounded-t-xl">
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-chart-line me-2"></i> Key Financial Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <span class="metric-label">Net Worth:</span>
+                                    <span class="metric-value currency-display" data-raw-value="{{ net_worth | default(0) }}"></span>
+                                </div>
+                                <i class="fas fa-dollar-sign text-primary"></i>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <span class="metric-label">Current Cash Flow:</span>
+                                    <span class="metric-value currency-display" data-raw-value="{{ cash_flow | default(0) }}"></span>
+                                </div>
+                                <i class="fas fa-exchange-alt {% if cash_flow | default(0) < 0 %}text-danger{% else %}text-success{% endif %}"></i>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <span class="metric-label">Total Savings:</span> {# Changed to Total Savings for clarity #}
+                                    <span class="metric-value currency-display" data-raw-value="{{ total_assets | default(0) }}"></span>
+                                </div>
+                                <i class="fas fa-piggy-bank text-warning"></i>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <span class="metric-label">Total Liabilities:</span>
+                                    <span class="metric-value currency-display" data-raw-value="{{ total_liabilities | default(0) }}"></span>
+                                </div>
+                                <i class="fas fa-hand-holding-usd text-danger"></i>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <span class="metric-label">Total Income (All Time):</span>
+                                    <span class="metric-value currency-display" data-raw-value="{{ all_total_income | default(0) }}"></span>
+                                </div>
+                                <i class="fas fa-money-bill-wave text-info"></i>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <span class="metric-label">Total Expenses (All Time):</span>
+                                    <span class="metric-value currency-display" data-raw-value="{{ all_total_expenses | default(0) }}"></span>
+                                </div>
+                                <i class="fas fa-receipt text-secondary"></i>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Financial Health Score Details #}
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect p-4">
+                    <div class="card-header card-header-gradient py-3 mb-4 rounded-t-xl">
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-info-circle me-2"></i> Financial Health Score Breakdown</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for detail in score_details %}
+                                <li class="list-group-item py-2 px-0">
+                                    <i class="fas fa-check-circle text-success me-2"></i> {{ detail }}
+                                </li>
+                            {% endfor %}
+                            {% if not score_details or score_details[0] == "No financial data recorded yet. Add some data to see your score!" %}
+                                <li class="list-group-item py-2 px-0 text-muted text-center">
+                                    No detailed score information available. Add more financial data!
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        {# Savings Goals Progress - Restored to better layout #}
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect p-4">
+                    <div class="card-header card-header-gradient py-3 mb-4 rounded-t-xl">
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-bullseye me-2"></i> Your Savings Goals Progress</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if savings_goals %}
+                            {% for goal in savings_goals %}
+                                <div class="savings-goal-item">
+                                    <div class="savings-goal-info">
+                                        <h6 class="mb-0 fw-bold text-dark">{{ goal.goal }}</h6>
+                                        <span class="savings-goal-amounts">
+                                            <span class="currency-display" data-raw-value="{{ goal.current_amount }}"></span>
+                                            /
+                                            <span class="currency-display" data-raw-value="{{ goal.target_amount }}"></span>
+                                        </span>
+                                    </div>
+                                    <div class="progress shadow-sm">
+                                        <div class="progress-bar
+                                            {% if goal.progress_percentage >= 100 %}bg-success
+                                            {% elif goal.progress_percentage >= 75 %}bg-info
+                                            {% else %}bg-warning
+                                            {% endif %}"
+                                            role="progressbar"
+                                            style="width: {{ goal.progress_percentage }}%;"
+                                            aria-valuenow="{{ goal.progress_percentage }}"
+                                            aria-valuemin="0" aria-valuemax="100">
+                                            {{ "%.1f" | format(goal.progress_percentage) }}%
+                                        </div>
+                                    </div>
+                                    {% if goal.progress_percentage >= 100 %}
+                                        <small class="text-success fw-bold savings-status"><i class="fas fa-check-circle me-1"></i> Goal Achieved!</small>
+                                    {% elif goal.current_amount < goal.target_amount %}
+                                        <small class="text-warning fw-semibold savings-status">
+                                            <i class="fas fa-hourglass-half me-1"></i> Remaining: <span class="currency-display" data-raw-value="{{ goal.target_amount - goal.current_amount }}"></span>
+                                        </small>
+                                    {% else %}
+                                        <small class="text-muted savings-status">Start saving!</small>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-5">No savings goals added yet. Add a goal to see your progress!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to format numbers as currency without .00 if it's a whole number
+            function formatCurrency(value) {
+                if (value === undefined || value === null || isNaN(value)) {
+                    return '$0';
+                }
+                const numberValue = parseFloat(value);
+                // Check if it's a whole number
+                if (numberValue % 1 === 0) {
+                    return new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    }).format(numberValue);
+                } else {
+                    return new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(numberValue);
+                }
+            }
+
+            // Apply currency formatting to all elements with 'currency-display' class
+            document.querySelectorAll('.currency-display').forEach(element => {
+                const rawValue = parseFloat(element.getAttribute('data-raw-value'));
+                element.textContent = formatCurrency(rawValue);
+            });
+
+
+            const canvas = document.getElementById('healthScoreSpeedometer');
+            // Check if canvas exists and context can be obtained
+            if (canvas && canvas.getContext) {
+                const ctx = canvas.getContext('2d');
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height; // Base of the speedometer is at the bottom center
+                const radius = canvas.width / 2 - 10; // Radius with some padding
+
+                // Ensure 'score' is parsed as a number with a default of 0
+                const score = parseFloat("{{ financial_health_score | default(0) }}");
+
+                function drawSpeedometer() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // Angles: 0% at 225 deg, 100% at -45 deg (or 315 deg)
+                    // Total range: 270 degrees (3/4 of a circle)
+                    const startAngle = Math.PI * 5 / 4; // 225 degrees
+                    const endAngle = Math.PI * 7 / 4; // 315 degrees (or -45 degrees)
+
+                    // Draw background arc
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                    ctx.lineWidth = 20;
+                    ctx.strokeStyle = '#e0e0e0'; // Light grey background
+                    ctx.stroke();
+
+                    // Draw colored arcs based on zones, using more vibrant theme colors
+                    // Poor (Red: 0-39) - Using a vibrant red
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, startAngle, startAngle + (endAngle - startAngle) * 0.39);
+                    ctx.strokeStyle = '#ef4444'; // Tailwind red-500
+                    ctx.stroke();
+
+                    // Fair (Orange: 40-69) - Using a vibrant orange
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, startAngle + (endAngle - startAngle) * 0.39, startAngle + (endAngle - startAngle) * 0.69);
+                    ctx.strokeStyle = '#f97316'; // Tailwind orange-500
+                    ctx.stroke();
+
+                    // Good (Green: 70-100) - Using a vibrant green
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, startAngle + (endAngle - startAngle) * 0.69, endAngle);
+                    ctx.strokeStyle = '#22c55e'; // Tailwind green-500
+                    ctx.stroke();
+
+                    // Draw Tick Marks
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#333';
+                    for (let i = 0; i <= 100; i += 10) {
+                        const angle = startAngle + (endAngle - startAngle) * (i / 100);
+                        const tickLength = (i % 50 === 0) ? 10 : 5; // Longer ticks for 0, 50, 100
+
+                        ctx.beginPath();
+                        ctx.moveTo(centerX + (radius - tickLength) * Math.cos(angle), centerY + (radius - tickLength) * Math.sin(angle));
+                        ctx.lineTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
+                        ctx.stroke();
+
+                        // Draw labels (0, 50, 100)
+                        if (i === 0 || i === 50 || i === 100) {
+                            ctx.save();
+                            ctx.translate(centerX + (radius - tickLength - 15) * Math.cos(angle), centerY + (radius - tickLength - 15) * Math.sin(angle));
+                            ctx.rotate(angle + Math.PI / 2); // Rotate text to align with the arc
+                            ctx.fillStyle = '#333';
+                            ctx.font = '10px Inter, sans-serif'; // Use Inter font
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(i + '%', 0, 0);
+                            ctx.restore();
+                        }
+                    }
+
+                    // Draw the Needle
+                    const needleAngle = startAngle + (endAngle - startAngle) * (score / 100);
+
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY); // Base of the needle at the center
+                    ctx.lineTo(centerX + (radius - 5) * Math.cos(needleAngle), centerY + (radius - 5) * Math.sin(needleAngle));
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#343a40'; // Dark color for needle
+                    ctx.stroke();
+
+                    // Draw a central circle for the needle pivot
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#343a40';
+                    ctx.fill();
+
+                    // Draw score text on canvas
+                    ctx.font = 'bold 2.5rem Inter, sans-serif'; // Larger, bolder font
+                    ctx.fillStyle = '#2563eb'; // Primary color
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'alphabetic';
+                    // Position the score slightly above the center base to be within the speedometer's open area
+                    ctx.fillText(score + '%', centerX, centerY - radius / 2);
+                }
+                drawSpeedometer(); // Initial draw
+            } else {
+                console.error("Canvas element 'healthScoreSpeedometer' not found or context could not be obtained.");
+            }
+        });
+    </script>
+{% endblock %}

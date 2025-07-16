@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block main %}
+    {# Link to the external profile-specific stylesheet #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/profile.css') }}">
+
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
+                <div class="card shadow-lg border-0 rounded-xl overflow-hidden glass-effect">
+                    <div class="card-header text-white text-center py-4 profile-header-gradient">
+                        <i class="fas fa-user-circle fa-4x mb-3 text-white"></i>
+                        <h2 class="h3 mb-0 text-white fw-bold">Your Profile</h2>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-5">
+                            <h4 class="card-title fw-bold text-gradient display-6">{{ user.username | default("Guest User") }}</h4>
+                            <p class="text-muted mb-0">Manage Your Personal Details and Account Settings</p>
+                        </div>
+
+                        <div class="list-group list-group-flush mb-5 rounded-lg border shadow-sm">
+                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <span class="fw-bold text-dark">Username:</span>
+                                <span class="text-muted fw-semibold">{{ user.username | default("N/A") }}</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <span class="fw-bold text-dark">Email:</span>
+                                <span class="text-muted fw-semibold">{{ user.email | default("N/A") }}</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <span class="fw-bold text-dark">Member Since:</span>
+                                <span class="text-muted fw-semibold">{{ user.created_at | default("N/A") }}</span>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-3 text-center text-gradient">Account Actions</h5>
+                        <div class="d-grid gap-3">
+                            <a href="/profile/edit" class="btn btn-outline-primary btn-lg rounded-pill shadow-sm animate-hover-lift">
+                                <i class="fas fa-edit me-2"></i> Edit Profile
+                            </a>
+                            <a href="/profile/change_password" class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm animate-hover-lift">
+                                <i class="fas fa-key me-2"></i> Change Password
+                            </a>
+                            <a href="/profile/delete_account" class="btn btn-outline-danger btn-lg rounded-pill shadow-sm mt-3 animate-hover-lift">
+                                <i class="fas fa-trash-alt me-2"></i> Delete Account
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

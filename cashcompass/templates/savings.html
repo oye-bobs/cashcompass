@@ -1,0 +1,291 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Savings
+{% endblock %}
+
+{% block main %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/savings.css') }}">
+
+    <div class="container py-4">
+        <div class="row g-4"> {# Changed from container py-8 to row for consistent layout #}
+            <!-- Left Half: Add Savings Form -->
+            <div class="col-md-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect"> {# Added shadow-lg, rounded-xl, glass-effect #}
+                    <div class="card-header card-header-gradient py-3"> {# Matched budget/expenses.html card-header style #}
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-plus-circle me-2"></i> Add New Savings Item</h5> {# Added icon and fw-bold #}
+                    </div>
+                    <div class="card-body p-4"> {# Adjusted padding #}
+                        <form action="/savings" method="post" autocomplete="off">
+                            <div class="mb-3">
+                                <label for="goal" class="form-label fw-bold text-muted">Savings Goal</label> {# Added fw-bold text-muted #}
+                                <input
+                                    id="goal"
+                                    name="goal"
+                                    type="text"
+                                    class="form-control rounded" {# Added rounded #}
+                                    placeholder="e.g., Emergency Fund, New Car"
+                                    required
+                                    autocomplete="off"
+                                >
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="form-label fw-bold text-muted">Current Amount Saved</label> {# Changed label and added fw-bold text-muted #}
+                                <div class="input-group"> {# Added input-group for currency symbol #}
+                                    <span class="input-group-text">$</span> {# Changed to $ for consistency #}
+                                    <input
+                                        id="amount"
+                                        name="amount"
+                                        type="number"
+                                        min="0" {# Changed min to 0 as current amount can be 0 #}
+                                        step="0.01"
+                                        class="form-control rounded-end" {# Added rounded-end #}
+                                        placeholder="e.g., 500" {# Updated placeholder #}
+                                        required
+                                        autocomplete="off"
+                                    >
+                                </div>
+                            </div>
+                            <div class="mb-4"> {# Increased margin-bottom #}
+                                <label for="target-amount" class="form-label fw-bold text-muted">Target Amount</label> {# New field for target amount and added fw-bold text-muted #}
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input
+                                        id="target-amount"
+                                        name="target_amount" {# Name for Flask form data #}
+                                        type="number"
+                                        min="1" {# Target amount should be at least 1 #}
+                                        step="0.01"
+                                        class="form-control rounded-end" {# Added rounded-end #}
+                                        placeholder="e.g., 10000"
+                                        required
+                                        autocomplete="off"
+                                    >
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success-themed w-100 btn-lg rounded-pill"> {# Changed to btn-success-themed w-100 btn-lg rounded-pill #}
+                                <i class="fas fa-plus-circle me-2"></i> Add Savings Goal
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Half: Savings Overview Table -->
+            <div class="col-md-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect"> {# Added shadow-lg, rounded-xl, glass-effect #}
+                    <div class="card-header card-header-gradient py-3"> {# Matched budget/expenses.html card-header style #}
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-piggy-bank me-2"></i> Current Savings Overview</h5> 
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column"> {# Adjusted padding and added flex-column #}
+                        {# Removed month selection dropdown for Savings as it's not month-specific #}
+
+                        {% if savings_items %}
+                            <div class="table-responsive flex-grow-1"> {# Added flex-grow-1 #}
+                                <table class="table table-hover align-middle"> {# Added align-middle #}
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Goal</th>
+                                            <th scope="col" class="text-end">Current ($)</th> {# Changed column header #}
+                                            <th scope="col" class="text-end">Target ($)</th> {# New column header #}
+                                            <th scope="col" class="text-end">Actions</th> {# Added Actions column #}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in savings_items %}
+                                            <tr>
+                                                <td>{{ item.goal }}</td>
+                                                <td class="text-end currency-display" data-raw-value="{{ item.amount }}"></td> {# Current Amount with currency-display #}
+                                                <td class="text-end currency-display" data-raw-value="{{ item.target_amount }}"></td> {# Target Amount with currency-display #}
+                                                <td class="text-end">
+                                                    <!-- Edit Button (Triggers Modal) -->
+                                                    <button class="btn btn-sm btn-outline-primary edit-savings-btn rounded-pill" {# Added rounded-pill #}
+                                                            data-bs-toggle="modal" data-bs-target="#editSavingsModal"
+                                                            data-id="{{ item.id }}"
+                                                            data-goal="{{ item.goal }}"
+                                                            data-amount="{{ item.amount }}"
+                                                            data-target-amount="{{ item.target_amount }}" {# Pass target amount #}
+                                                            title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <!-- Delete Button (Triggers Confirmation) -->
+                                                    <button class="btn btn-sm btn-outline-danger delete-savings-btn rounded-pill ms-2" {# Added rounded-pill ms-2 #}
+                                                            data-id="{{ item.id }}"
+                                                            data-goal="{{ item.goal }}"
+                                                            title="Delete"
+                                                            data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="table-light"> {# Changed from table-primary to table-light for consistency #}
+                                        <tr class="fw-bold">
+                                            <td>Total Current Savings:</td> {# Changed label #}
+                                            <td class="text-end currency-display" data-raw-value="{{ total_current_savings }}"></td> {# Now only current savings with currency-display #}
+                                            <td></td> {# Empty cell for Target ($) column #}
+                                            <td></td> {# Empty cell for Actions column #}
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-5 my-auto">No savings goals added yet. Use the form on the left to add your first savings goal!</p> {# Updated text #}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Edit Savings Modal -->
+<div class="modal fade" id="editSavingsModal" tabindex="-1" aria-labelledby="editSavingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card rounded-xl glass-effect"> {# Added card, rounded-xl, glass-effect to modal-content #}
+            <div class="modal-header card-header-gradient py-3"> {# Applied gradient class #}
+                <h5 class="modal-title fw-bold" id="editSavingsModalLabel">Edit Savings Item</h5> {# Added fw-bold #}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editSavingsForm" method="post">
+                <div class="modal-body p-4"> {# Adjusted padding #}
+                    <input type="hidden" id="editSavingsId" name="id">
+                    <div class="mb-3">
+                        <label for="editGoal" class="form-label fw-bold text-muted">Savings Goal</label> {# Added fw-bold text-muted #}
+                        <input type="text" class="form-control rounded" id="editGoal" name="goal" required> {# Added rounded #}
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAmount" class="form-label fw-bold text-muted">Current Amount Saved</label> {# Changed label and added fw-bold text-muted #}
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control rounded-end" id="editAmount" name="amount" step="0.01" min="0" required> {# Changed min to 0 and added rounded-end #}
+                        </div>
+                    </div>
+                    <div class="mb-4"> {# Increased margin-bottom #}
+                        <label for="editTargetAmount" class="form-label fw-bold text-muted">Target Amount</label> {# New field and added fw-bold text-muted #}
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control rounded-end" id="editTargetAmount" name="target_amount" step="0.01" min="1" required> {# New field and added rounded-end #}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button> {# Added rounded-pill #}
+                    <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button> {# Added rounded-pill #}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card rounded-xl glass-effect"> {# Added card, rounded-xl, glass-effect to modal-content #}
+            <div class="modal-header bg-danger text-white py-3"> {# Applied bg-danger and padding #}
+                <h5 class="modal-title fw-bold" id="deleteConfirmationModalLabel">Confirm Deletion</h5> {# Added fw-bold #}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4"> {# Adjusted padding #}
+                Are you sure you want to delete the savings item for "<span id="deleteGoalSpan" class="fw-bold text-danger"></span>"? This action cannot be undone. {# Added fw-bold text-danger #}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button> {# Added rounded-pill #}
+                <form id="deleteSavingsForm" method="post" style="display:inline;">
+                    <input type="hidden" id="deleteSavingsId" name="id">
+                    <button type="submit" class="btn btn-danger rounded-pill">Delete</button> {# Added rounded-pill #}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to format numbers as currency without .00 if it's a whole number
+        function formatCurrency(value) {
+            if (value === undefined || value === null || isNaN(value)) {
+                return '$0';
+            }
+            const numberValue = parseFloat(value);
+            // Check if it's a whole number
+            if (numberValue % 1 === 0) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0, // No decimal digits for whole numbers
+                    maximumFractionDigits: 0
+                }).format(numberValue);
+            } else {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2, // Always show 2 decimal digits for non-whole numbers
+                    maximumFractionDigits: 2
+                }).format(numberValue);
+            }
+        }
+
+        // Function to find all elements with data-raw-value and format them
+        function formatCurrencyDisplays() {
+            document.querySelectorAll('.currency-display').forEach(element => {
+                const rawValue = parseFloat(element.getAttribute('data-raw-value'));
+                element.textContent = formatCurrency(rawValue);
+            });
+        }
+
+        // Call formatting function on DOMContentLoaded
+        formatCurrencyDisplays();
+
+        // Handle Edit Savings Button Click to populate modal
+        const editSavingsModal = document.getElementById('editSavingsModal');
+        if (editSavingsModal) {
+            editSavingsModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const goal = button.getAttribute('data-goal');
+                const amount = button.getAttribute('data-amount');
+                const targetAmount = button.getAttribute('data-target-amount'); // Get target amount
+
+                // Update the modal's content
+                const modalTitle = editSavingsModal.querySelector('.modal-title');
+                const editSavingsId = editSavingsModal.querySelector('#editSavingsId');
+                const editGoalInput = editSavingsModal.querySelector('#editGoal');
+                const editAmountInput = editSavingsModal.querySelector('#editAmount');
+                const editTargetAmountInput = editSavingsModal.querySelector('#editTargetAmount'); // New input
+                const editSavingsForm = editSavingsModal.querySelector('#editSavingsForm');
+
+                modalTitle.textContent = 'Edit Savings Item: ' + goal;
+                editSavingsId.value = id;
+                editGoalInput.value = goal;
+                editAmountInput.value = parseFloat(amount).toFixed(2);
+                editTargetAmountInput.value = parseFloat(targetAmount).toFixed(2); // Set target amount
+
+                // Set the form action dynamically
+                editSavingsForm.action = `/savings/edit/${id}`;
+            });
+        }
+
+        // Handle Delete Savings Button Click to populate confirmation modal
+        const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
+        if (deleteConfirmationModal) {
+            deleteConfirmationModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const goal = button.getAttribute('data-goal');
+
+                // Update the modal's content
+                const deleteGoalSpan = deleteConfirmationModal.querySelector('#deleteGoalSpan');
+                const deleteSavingsId = deleteConfirmationModal.querySelector('#deleteSavingsId');
+                const deleteSavingsForm = deleteConfirmationModal.querySelector('#deleteSavingsForm');
+
+                deleteGoalSpan.textContent = goal;
+                deleteSavingsId.value = id;
+
+                // Set the form action dynamically
+                deleteSavingsForm.action = `/savings/delete/${id}`;
+            });
+        }
+    });
+</script>
+{% endblock %}

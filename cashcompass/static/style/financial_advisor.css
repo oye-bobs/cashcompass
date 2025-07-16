@@ -1,0 +1,224 @@
+/* Custom styles for the AI Advisor page, ensuring consistency with CashCompass theme */
+        /* Re-using variables from the global style.css (or defining them if not universally available) */
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+        }
+
+        /* Main header gradient for the top card */
+        .ai-advisor-header-gradient {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2.5rem 0;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-advisor-header-gradient .display-5 {
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            z-index: 1;
+            position: relative;
+        }
+
+        .ai-advisor-header-gradient p {
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Glass effect for cards */
+        .glass-effect {
+            background-color: rgba(255, 255, 255, 0.85); /* Slightly transparent white */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Text gradient for key elements */
+        .text-gradient {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent; /* Fallback for browsers that don't support text-fill-color */
+        }
+
+        /* Feature List Styling */
+        .feature-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            list-style: none;
+            padding: 0;
+            margin-bottom: 3rem;
+        }
+
+        .feature-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 150px;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            background-color: var(--light-bg);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-lg);
+        }
+
+        .feature-item i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-item h6 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-color);
+        }
+
+        .feature-item small {
+            color: var(--muted-text-color);
+        }
+
+        /* Inner Card Header (for advice content card) */
+        .advice-card .card-header-gradient {
+            background: linear-gradient(135deg, var(--success-color), #107538); /* Green gradient */
+            color: white;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+        }
+
+        /* Buttons consistent with dashboard style */
+        .btn {
+            border-radius: 9999px; /* rounded-pill */
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-lg);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #107538; /* darker green */
+            border-color: #107538;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background-color: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 8px solid var(--border-color);
+            border-top: 8px solid var(--primary-color);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 1.5s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress {
+            height: 8px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .progress-bar {
+            background-color: var(--primary-color);
+        }
+
+        /* Advice Output Styling */
+        .financial-advice-output {
+            background-color: var(--light-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 1rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .financial-advice-output h1, .financial-advice-output h2, .financial-advice-output h3, .financial-advice-output h4, .financial-advice-output h5, .financial-advice-output h6 {
+            color: var(--primary-color);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .financial-advice-output ul, .financial-advice-output ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .financial-advice-output li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .ai-advisor-header-gradient .display-5 {
+                font-size: 2rem;
+            }
+            .feature-list {
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+            .feature-item {
+                max-width: 120px;
+                padding: 0.75rem;
+            }
+            .feature-item i {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+            }
+            .feature-item h6 {
+                font-size: 0.9rem;
+            }
+            .financial-advice-output {
+                padding: 15px;
+            }
+        }

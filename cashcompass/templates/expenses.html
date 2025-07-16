@@ -1,0 +1,279 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Expenses
+{% endblock %}
+
+{% block main %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/expenses.css') }}">
+    <div class="container py-4">
+        <div class="row g-4"> {# Added g-4 for consistent gutter #}
+            <!-- Left Half: Add Expense Form -->
+            <div class="col-md-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect"> {# Added shadow-lg, rounded-xl, glass-effect #}
+                    <div class="card-header card-header-gradient py-3"> {# Applied new gradient class and padding #}
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-plus-circle me-2"></i> Add New Expense Item</h5> {# Added icon and fw-bold #}
+                    </div>
+                    <div class="card-body p-4"> {# Adjusted padding #}
+                        <form action="/expenses" method="post" autocomplete="off">
+                            <div class="mb-3">
+                                <label for="category" class="form-label fw-bold text-muted">Category</label>
+                                <select id="category" name="category" class="form-select rounded" required>
+                                    <option disabled selected value="">-- Select a Category --</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category }}">{{ category }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="form-label fw-bold text-muted">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input id="amount" name="amount" type="number" min="0" step="0.01" class="form-control rounded-end" placeholder="e.g., 50.75" required> {# Changed min to 0, adjusted placeholder, added rounded-end #}
+                                </div>
+                            </div>
+                            <div class="mb-4"> {# Increased margin-bottom #}
+                                <label for="expense-date" class="form-label fw-bold text-muted">Date</label>
+                                <input type="date" class="form-control rounded" id="expense-date" name="date" value="{{ current_date_iso }}" required>
+                            </div>
+                            <button class="btn btn-success-themed w-100 btn-lg rounded-pill" type="submit"> {# Added btn-lg and rounded-pill #}
+                                <i class="fas fa-plus-circle me-2"></i> Add Expense
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Half: Expenses Overview Table -->
+            <div class="col-md-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect"> {# Added shadow-lg, rounded-xl, glass-effect #}
+                    <div class="card-header card-header-gradient py-3"> {# Applied new gradient class and padding #}
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-list-alt me-2"></i> Expenses Overview for {{ selected_month_display }}</h5> {# Added icon and fw-bold #}
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column"> {# Adjusted padding and added flex-column for better layout control #}
+                        <div class="d-flex justify-content-end mb-4 view-month-selector-container"> {# Added mb-4 and new container class #}
+                            <form action="/expenses" method="get" class="d-flex align-items-center w-100"> {# Added w-100 for full width of container #}
+                                <label for="view-month-select" class="form-label me-2 my-auto view-month-selector-label">View Month:</label>
+                                <select name="month" id="view-month-select" class="form-select form-select-sm view-month-select-dropdown" onchange="this.form.submit()">
+                                    {% for month_val, month_label in available_months %}
+                                        <option value="{{ month_val }}" {% if month_val == selected_month %}selected{% endif %}>
+                                            {{ month_label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </div>
+
+                        {# Assuming 'expenses_items' list is passed from Flask #}
+                        {% if expenses_items %}
+                            <div class="table-responsive flex-grow-1"> {# Added flex-grow-1 for table to take available space #}
+                                <table class="table table-hover align-middle"> {# Added align-middle for vertical alignment #}
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Category</th>
+                                            <th scope="col" class="text-end">Amount ($)</th>
+                                            <th scope="col" class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in expenses_items %}
+                                            <tr>
+                                                <td>{{ item.category }}</td>
+                                                <td class="text-end currency-display" data-raw-value="{{ item.amount }}"></td> {# Added class and data-raw-value #}
+                                                <td class="text-end">
+                                                    <!-- Edit Button (Triggers Modal) -->
+                                                    <button class="btn btn-sm btn-outline-primary edit-expense-btn rounded-pill"
+                                                            data-bs-toggle="modal" data-bs-target="#editExpenseModal"
+                                                            data-id="{{ item.id }}"
+                                                            data-category="{{ item.category }}"
+                                                            data-amount="{{ item.amount }}"
+                                                            data-date="{{ item.date | default('') }}"
+                                                            title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <!-- Delete Button (Triggers Confirmation) -->
+                                                    <button class="btn btn-sm btn-outline-danger delete-expense-btn rounded-pill ms-2" {# Added ms-2 for spacing #}
+                                                            data-id="{{ item.id }}"
+                                                            data-category="{{ item.category }}"
+                                                            title="Delete"
+                                                            data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr class="fw-bold">
+                                            <td>Total Expenses for {{ selected_month_display }}:</td>
+                                            <td class="text-end currency-display" data-raw-value="{{ total_expenses }}"></td> {# Added class and data-raw-value #}
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-5 my-auto">No expenses added for {{ selected_month_display }} yet. Use the form on the left to add your first expense!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Edit Expense Modal -->
+<div class="modal fade" id="editExpenseModal" tabindex="-1" aria-labelledby="editExpenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card rounded-xl glass-effect"> {# Added card, rounded-xl, glass-effect to modal-content #}
+            <div class="modal-header card-header-gradient py-3"> {# Applied gradient class #}
+                <h5 class="modal-title fw-bold" id="editExpenseModalLabel">Edit Expense Item</h5> {# Added fw-bold #}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editExpenseForm" method="post">
+                <div class="modal-body p-4"> {# Adjusted padding #}
+                    <input type="hidden" id="editExpenseId" name="id">
+                    <div class="mb-3">
+                        <label for="editCategory" class="form-label fw-bold text-muted">Category</label>
+                        <input type="text" class="form-control rounded" id="editCategory" name="category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAmount" class="form-label fw-bold text-muted">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control rounded-end" id="editAmount" name="amount" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="mb-4"> {# Increased margin-bottom #}
+                        <label for="editExpenseDate" class="form-label fw-bold text-muted">Date</label>
+                        <input type="date" class="form-control rounded" id="editExpenseDate" name="date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card rounded-xl glass-effect"> {# Added card, rounded-xl, glass-effect to modal-content #}
+            <div class="modal-header bg-danger text-white py-3"> {# Applied bg-danger and padding #}
+                <h5 class="modal-title fw-bold" id="deleteConfirmationModalLabel">Confirm Deletion</h5> {# Added fw-bold #}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4"> {# Adjusted padding #}
+                Are you sure you want to delete the expense item for "<span id="deleteCategorySpan" class="fw-bold text-danger"></span>"? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteExpenseForm" method="post" style="display:inline;">
+                    <input type="hidden" id="deleteExpenseId" name="id">
+                    <button type="submit" class="btn btn-danger rounded-pill">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to format numbers as currency without .00 if it's a whole number
+        function formatCurrency(value) {
+            if (value === undefined || value === null || isNaN(value)) {
+                return '$0';
+            }
+            const numberValue = parseFloat(value);
+            // Check if it's a whole number
+            if (numberValue % 1 === 0) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0, // No decimal digits for whole numbers
+                    maximumFractionDigits: 0
+                }).format(numberValue);
+            } else {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2, // Always show 2 decimal digits for non-whole numbers
+                    maximumFractionDigits: 2
+                }).format(numberValue);
+            }
+        }
+
+        // Function to find all elements with data-raw-value and format them
+        function formatCurrencyDisplays() {
+            document.querySelectorAll('.currency-display').forEach(element => {
+                const rawValue = parseFloat(element.getAttribute('data-raw-value'));
+                element.textContent = formatCurrency(rawValue);
+            });
+        }
+
+        // Call formatting function on DOMContentLoaded
+        formatCurrencyDisplays();
+
+
+        // Handle Edit Button Click to populate modal
+        const editExpenseModal = document.getElementById('editExpenseModal');
+        if (editExpenseModal) { // Check if the modal exists before adding listener
+            editExpenseModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const id = button.getAttribute('data-id');
+                const category = button.getAttribute('data-category');
+                const amount = button.getAttribute('data-amount');
+                const date = button.getAttribute('data-date'); // Get the date
+
+                // Update the modal's content
+                const modalTitle = editExpenseModal.querySelector('.modal-title');
+                const editExpenseId = editExpenseModal.querySelector('#editExpenseId');
+                const editCategoryInput = editExpenseModal.querySelector('#editCategory');
+                const editAmountInput = editExpenseModal.querySelector('#editAmount');
+                const editExpenseDateInput = editExpenseModal.querySelector('#editExpenseDate'); // Get date input
+                const editExpenseForm = editExpenseModal.querySelector('#editExpenseForm');
+
+                modalTitle.textContent = 'Edit Expense Item: ' + category;
+                editExpenseId.value = id;
+                editCategoryInput.value = category;
+                editAmountInput.value = parseFloat(amount).toFixed(2); // Ensure two decimal places for editing
+
+                // Format date for input[type="date"]
+                if (date) {
+                    // Ensure date is in YYYY-MM-DD format for the input[type="date"]
+                    editExpenseDateInput.value = new Date(date).toISOString().split('T')[0];
+                } else {
+                    editExpenseDateInput.value = ''; // Clear if no date
+                }
+
+                // Set the form action dynamically
+                editExpenseForm.action = `/expenses/edit/${id}`; // Assuming Flask route like /expenses/edit/<id>
+            });
+        }
+
+
+        // Handle Delete Button Click to populate confirmation modal
+        const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
+        if (deleteConfirmationModal) { // Check if the modal exists before adding listener
+            deleteConfirmationModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const id = button.getAttribute('data-id');
+                const category = button.getAttribute('data-category');
+
+                // Update the modal's content
+                const deleteCategorySpan = deleteConfirmationModal.querySelector('#deleteCategorySpan');
+                const deleteExpenseId = deleteConfirmationModal.querySelector('#deleteExpenseId');
+                const deleteExpenseForm = deleteConfirmationModal.querySelector('#deleteExpenseForm');
+
+                deleteCategorySpan.textContent = category;
+                deleteExpenseId.value = id;
+
+                // Set the form action dynamically
+                deleteExpenseForm.action = `/expenses/delete/${id}`; // Assuming Flask route like /expenses/delete/<id>
+            });
+        }
+    });
+</script>
+{% endblock %}

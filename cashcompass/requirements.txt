@@ -1,0 +1,9 @@
+Flask
+Flask-Session
+Flask-SQLAlchemy
+psycopg2-binary
+python-dotenv
+requests
+markdown
+Flask-Mail
+itsdangerous

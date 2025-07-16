@@ -1,0 +1,99 @@
+/* Custom styles for this specific register page, overriding or enhancing base styles */
+        body {
+            /* Full viewport height, gradient background similar to app, but perhaps more subtle for a login page */
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c4d7ff 100%); /* Lighter, calming blue gradient */
+            display: flex; /* Use flexbox to center content */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            padding: 20px; /* Add some padding for smaller screens */
+        }
+
+        .register-card {
+            max-width: 450px; /* Max width similar to login page */
+            width: 100%; /* Full width on smaller screens */
+            border-radius: 12px; /* Consistent rounded corners */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Stronger, softer shadow */
+            overflow: hidden; /* Ensure rounded corners clip content */
+            background-color: #ffffff; /* White background for the card */
+            padding: 30px; /* Generous padding inside the card */
+        }
+
+        .register-logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0; /* Subtle separator below logo */
+        }
+
+        .register-logo h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c3e50; /* Darker primary color for logo text */
+            margin-bottom: 5px;
+        }
+
+        .register-logo h1 i {
+            color: #3498db; /* Distinct color for compass icon */
+            margin-right: 10px;
+        }
+
+        .register-logo p {
+            font-size: 0.9rem;
+            color: #7f8c8d; /* Muted grey for tagline */
+        }
+
+        .form-floating label {
+            color: #607d8b; /* Slightly darker placeholder text */
+        }
+
+        .form-control:focus {
+            border-color: #3498db; /* Blue border on focus */
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); /* Blue glow on focus */
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2980b9); /* More pronounced blue gradient for button */
+            border: none;
+            font-weight: 600;
+            padding: 12px 25px; /* Comfortable button padding */
+            border-radius: 50px; /* Pill shape */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(45deg, #2980b9, #3498db); /* Reverse gradient on hover */
+        }
+
+        .text-link {
+            color: #3498db; /* Blue for links */
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .text-link:hover {
+            color: #2980b9; /* Darker blue on hover */
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .register-card {
+                padding: 20px; /* Smaller padding on very small screens */
+                border-radius: 0; /* Full width, no rounded corners on very small screens */
+                box-shadow: none; /* No shadow for full-width mobile experience */
+            }
+            body {
+                padding: 0; /* Remove body padding on very small screens */
+            }
+            .register-logo {
+                margin-bottom: 20px;
+            }
+            .register-logo h1 {
+                font-size: 1.8rem;
+            }
+        }

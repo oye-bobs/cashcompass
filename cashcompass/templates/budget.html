@@ -1,0 +1,400 @@
+{% extends "layout.html" %}
+
+{% block title %}Create Budget{% endblock %}
+
+{% block main %}
+    <style>
+        /* CSS Variables from layout.html for consistency */
+        :root {
+            --primary-color: #2563eb; /* A shade of blue */
+            --secondary-color: #1e40af; /* A darker shade of blue */
+            --border-radius: 0.75rem; /* Rounded-xl equivalent */
+        }
+
+        /* Gradient for card headers to match dashboard chart headers */
+        .card-header-gradient {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+            color: white; /* Ensure text is white on this dark gradient */
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+        }
+
+        /* Consistent card styling */
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* Ensures content respects rounded corners */
+        }
+
+        /* Input group text styling */
+        .input-group-text {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            border-right: none; /* No border on the right to blend with input */
+        }
+
+        /* Form control styling */
+        .form-control {
+            border-radius: 0.25rem; /* Slightly rounded for inputs */
+            border-left: none; /* No border on the left to blend with input-group-text */
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+            border-color: var(--primary-color);
+        }
+
+        /* Button styling */
+        .btn-success-themed {
+            background: linear-gradient(135deg, #10b981, #059669); /* Green gradient for Add Expense */
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+        .btn-success-themed:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Table header styling */
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom: none; /* Remove default table header border */
+        }
+
+        /* Table footer styling */
+        .table tfoot tr {
+            background-color: var(--primary-color); /* Darker footer */
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Custom styling for the month selector in the overview */
+        .view-month-selector-container {
+            background: rgba(var(--primary-color-rgb), 0.1); /* Light blue tint */
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(var(--primary-color-rgb), 0.2);
+        }
+        .view-month-selector-label {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        .view-month-select-dropdown {
+            border: none;
+            background-color: transparent;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        .view-month-select-dropdown:focus {
+            box-shadow: none;
+        }
+        .view-month-select-dropdown option {
+            color: #334155; /* Darker text for options in the dropdown list */
+            background-color: white; /* White background for options */
+        }
+
+        /* Ensuring h-100 on card wrapper works */
+        .col-md-6 > .card {
+            min-height: 500px; /* Example fixed height for demonstration, adjust as needed */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .col-md-6 {
+                margin-bottom: 1.5rem; /* Add spacing between stacked columns on mobile */
+            }
+            .col-md-6:last-child {
+                margin-bottom: 0;
+            }
+            .card-body {
+                padding: 1.5rem; /* Adjust padding on smaller screens */
+            }
+            .table-responsive {
+                border-radius: var(--border-radius); /* Apply border-radius to table container */
+                overflow: hidden; /* Ensure clipping of table borders */
+            }
+            .col-md-6 > .card {
+                 min-height: auto; /* Remove fixed height on mobile if not suitable */
+            }
+        }
+    </style>
+
+    <div class="container py-4">
+        <div class="row g-4">
+            <!-- Left Column - Add New Budget -->
+            <div class="col-md-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect">
+                    <div class="card-header card-header-gradient py-3">
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-plus-circle me-2"></i> Add New Budget Item</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form action="/budget" method="post">
+                            <div class="mb-3">
+                                <label for="category" class="form-label fw-bold text-muted">Category</label>
+                                <input type="text" class="form-control rounded" id="category" name="category"
+                                       placeholder="e.g., Groceries, Rent" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="form-label fw-bold text-muted">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control rounded-end" id="amount" name="amount"
+                                           placeholder="Enter amount (e.g., 500)" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="budget-month" class="form-label fw-bold text-muted">Budget for Month</label>
+                                <input type="month" class="form-control rounded" id="budget-month" name="month"
+                                       value="{{ current_month_iso }}" required>
+                            </div>
+                            <button type="submit" class="btn btn-success-themed w-100 btn-lg rounded-pill">
+                                <i class="fas fa-plus-circle me-2"></i> Add Budget
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Current Budget Overview -->
+            <div class="col-md-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect">
+                    <div class="card-header card-header-gradient py-3">
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i> Budget Overview for {{ selected_month_display }}</h5>
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-end mb-4 view-month-selector-container rounded-pill">
+                            <form action="/budget" method="get" class="d-flex align-items-center w-100">
+                                <label for="view-month-select" class="form-label me-2 my-auto view-month-selector-label">View Month:</label>
+                                <select name="month" id="view-month-select" class="form-select form-select-sm view-month-select-dropdown" onchange="this.form.submit()">
+                                    {% for month_val, month_label in available_months %}
+                                        <option value="{{ month_val }}" {% if month_val == selected_month %}selected{% endif %}>
+                                            {{ month_label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </div>
+
+                        {% if budget_items %}
+                            <div class="table-responsive flex-grow-1">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th class="text-end">Amount ($)</th>
+                                            <th class="text-end">Date</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in budget_items %}
+                                        <tr>
+                                            <td>{{ item.category }}</td>
+                                            <td class="text-end currency-display" data-raw-value="{{ item.amount }}"></td>
+                                            <td class="text-end">
+                                                {% if item.date %}
+                                                    {{ item.date | to_datetime | default(item.date, true) | date_format('%m/%Y') }}
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <!-- Edit Button (Triggers Modal) -->
+                                                <button class="btn btn-sm btn-outline-primary edit-budget-btn rounded-pill"
+                                                        data-bs-toggle="modal" data-bs-target="#editBudgetModal"
+                                                        data-id="{{ item.id }}"
+                                                        data-category="{{ item.category }}"
+                                                        data-amount="{{ item.amount }}"
+                                                        data-date="{{ item.date | default('') }}"
+                                                        title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <!-- Delete Button (Triggers Confirmation) -->
+                                                <button class="btn btn-sm btn-outline-danger delete-budget-btn rounded-pill ms-2"
+                                                        data-id="{{ item.id }}"
+                                                        data-category="{{ item.category }}"
+                                                        title="Delete"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr class="fw-bold">
+                                            <td>Total Budget for {{ selected_month_display }}:</td>
+                                            <td class="text-end currency-display" data-raw-value="{{ total_budget }}"></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-5 my-auto">No budget items added for {{ selected_month_display }} yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Edit Budget Modal -->
+<div class="modal fade" id="editBudgetModal" tabindex="-1" aria-labelledby="editBudgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card rounded-xl glass-effect">
+            <div class="modal-header card-header-gradient py-3">
+                <h5 class="modal-title fw-bold" id="editBudgetModalLabel">Edit Budget Item</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editBudgetForm" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editBudgetId" name="id">
+                    <div class="mb-3">
+                        <label for="editCategory" class="form-label fw-bold text-muted">Category</label>
+                        <input type="text" class="form-control rounded" id="editCategory" name="category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAmount" class="form-label fw-bold text-muted">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control rounded-end" id="editAmount" name="amount" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editBudgetDate" class="form-label fw-bold text-muted">Date</label>
+                        <input type="date" class="form-control rounded" id="editBudgetDate" name="date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card rounded-xl glass-effect">
+            <div class="modal-header bg-danger text-white py-3">
+                <h5 class="modal-title fw-bold" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                Are you sure you want to delete the budget item for "<span id="deleteCategorySpan" class="fw-bold text-danger"></span>"? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteBudgetForm" method="post" style="display:inline;">
+                    <input type="hidden" id="deleteBudgetId" name="id">
+                    <button type="submit" class="btn btn-danger rounded-pill">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to format numbers as currency without .00 if it's a whole number
+        function formatCurrency(value) {
+            if (value === undefined || value === null || isNaN(value)) {
+                return '$0';
+            }
+            const numberValue = parseFloat(value);
+            // Check if it's a whole number
+            if (numberValue % 1 === 0) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0, // No decimal digits for whole numbers
+                    maximumFractionDigits: 0
+                }).format(numberValue);
+            } else {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2, // Always show 2 decimal digits for non-whole numbers
+                    maximumFractionDigits: 2
+                }).format(numberValue);
+            }
+        }
+
+        // Function to find all elements with data-raw-value and format them
+        function formatCurrencyDisplays() {
+            document.querySelectorAll('.currency-display').forEach(element => {
+                const rawValue = parseFloat(element.getAttribute('data-raw-value'));
+                element.textContent = formatCurrency(rawValue);
+            });
+        }
+
+        // Call formatting function on DOMContentLoaded
+        formatCurrencyDisplays();
+
+        // Handle Edit Button Click to populate modal
+        const editBudgetModal = document.getElementById('editBudgetModal');
+        if (editBudgetModal) { // Check if the modal exists before adding listener
+            editBudgetModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const id = button.getAttribute('data-id');
+                const category = button.getAttribute('data-category');
+                const amount = button.getAttribute('data-amount');
+                const date = button.getAttribute('data-date'); // Get the date
+
+                // Update the modal's content
+                const modalTitle = editBudgetModal.querySelector('.modal-title');
+                const editBudgetId = editBudgetModal.querySelector('#editBudgetId');
+                const editCategoryInput = editBudgetModal.querySelector('#editCategory');
+                const editAmountInput = editBudgetModal.querySelector('#editAmount');
+                const editBudgetDateInput = editBudgetModal.querySelector('#editBudgetDate'); // Get date input
+                const editBudgetForm = editBudgetModal.querySelector('#editBudgetForm');
+
+                modalTitle.textContent = 'Edit Budget Item: ' + category;
+                editBudgetId.value = id;
+                editCategoryInput.value = category;
+                editAmountInput.value = parseFloat(amount).toFixed(2); // Ensure two decimal places for editing
+
+                // Format date for input[type="date"]
+                if (date) {
+                    // Ensure date is in YYYY-MM-DD format for the input[type="date"]
+                    editBudgetDateInput.value = new Date(date).toISOString().split('T')[0];
+                } else {
+                    editBudgetDateInput.value = ''; // Clear if no date
+                }
+
+                // Set the form action dynamically
+                editBudgetForm.action = `/budget/edit/${id}`; // Assuming Flask route like /budget/edit/<id>
+            });
+        }
+
+        // Handle Delete Button Click to populate confirmation modal
+        const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
+        if (deleteConfirmationModal) { // Check if the modal exists before adding listener
+            deleteConfirmationModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const id = button.getAttribute('data-id');
+                const category = button.getAttribute('data-category');
+
+                // Update the modal's content
+                const deleteCategorySpan = deleteConfirmationModal.querySelector('#deleteCategorySpan');
+                const deleteBudgetId = deleteConfirmationModal.querySelector('#deleteBudgetId');
+                const deleteBudgetForm = deleteConfirmationModal.querySelector('#deleteBudgetForm');
+
+                deleteCategorySpan.textContent = category;
+                deleteBudgetId.value = id;
+
+                // Set the form action dynamically
+                deleteBudgetForm.action = `/budget/delete/${id}`; // Assuming Flask route like /budget/delete/<id>
+            });
+        }
+    });
+</script>
+{% endblock %}

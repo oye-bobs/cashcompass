@@ -1,0 +1,108 @@
+/* Custom CSS to match CashCompass theme */
+
+        body {
+            background-color: #f0f2f5; /* Light background similar to the main content area */
+            font-family: 'Inter', sans-serif; /* Consistent font */
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.15); /* Slightly transparent white background */
+            backdrop-filter: blur(10px); /* Frosted glass effect */
+            -webkit-backdrop-filter: blur(10px); /* For Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15); /* Deeper shadow for prominence */
+            border-radius: 20px; /* More rounded corners, matching the dashboard cards */
+        }
+
+        .profile-header-gradient {
+            /* A blue-teal gradient similar to the "Total Income" card or sidebar active state */
+            background: linear-gradient(to right, #20c997, #007bff); /* Adjusted gradient for vibrancy */
+            color: #fff; /* Ensure text is white on this dark gradient */
+            border-top-left-radius: 20px; /* Match parent's border-radius */
+            border-top-right-radius: 20px;
+        }
+
+        .text-gradient {
+            /* Vibrant blue gradient for text elements */
+            background: linear-gradient(45deg, #007bff, #00c6ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent; /* Fallback for browsers that don't support text-fill-color */
+        }
+
+        .animate-hover-lift {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .animate-hover-lift:hover {
+            transform: translateY(-5px); /* Lifts the element more noticeably */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25); /* Enhanced shadow on hover */
+        }
+
+        /* Further button styling to match CashCompass aesthetic */
+        .btn-outline-primary {
+            border-color: #007bff;
+            color: #007bff;
+        }
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+        .btn-outline-secondary {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: #fff;
+            border-color: #6c757d;
+        }
+
+        .btn-outline-danger {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        .list-group-item {
+            background-color: transparent; /* Ensure list items are transparent to show glass effect if applied to parent */
+            border-color: rgba(255, 255, 255, 0.2); /* Lighter border for list items */
+        }
+        .list-group-item:last-child {
+            border-bottom: none; /* No border for the last item in a flush list group */
+        }
+        .list-group-item:first-child {
+            border-top: none;
+        }
+        /* Add specific styles for the delete account page here, if not in profile.css */
+        .delete-header-gradient {
+            /* A distinct red/orange gradient to signify caution/danger */
+            background: linear-gradient(to right, #dc3545, #fd7e14); /* Red to orange gradient */
+            color: #fff;
+            border-top-left-radius: 20px; /* Match parent's border-radius */
+            border-top-right-radius: 20px;
+        }
+        /* Ensure specific styles for password toggle are here or in profile.css */
+        .btn-link {
+            text-decoration: none;
+        }
+
+        /* Specific styles for the settings page header */
+        .settings-header-gradient {
+            /* A cool blue/purple gradient for the settings page header */
+            background: linear-gradient(to right, #6a11cb, #2575fc); /* Example: Deep purple to vibrant blue */
+            color: #fff;
+            border-top-left-radius: 20px; /* Match parent's border-radius */
+            border-top-right-radius: 20px;
+        }
+        /* Ensure specific styles for password toggle are here or in profile.css if shared */
+        .btn-link {
+            text-decoration: none;
+        }

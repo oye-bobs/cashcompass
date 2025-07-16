@@ -1,0 +1,294 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Debt
+{% endblock %}
+
+{% block main %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/debt.css') }}">
+    <div class="container py-4">
+        <div class="row g-4">
+            <!-- Left Half: Add Debt Form -->
+            <div class="col-md-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect"> {# Added shadow-lg, rounded-xl, glass-effect #}
+                    <div class="card-header card-header-gradient py-3"> {# Matched other pages card-header style #}
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-plus-circle me-2"></i> Add New Debt Item</h5> {# Added icon and fw-bold #}
+                    </div>
+                    <div class="card-body p-4"> {# Adjusted padding #}
+                        <form action="/debt" method="post" autocomplete="off">
+                            <div class="mb-3">
+                                <label for="debt-name" class="form-label fw-bold text-muted">Debt Name</label> {# Added fw-bold text-muted #}
+                                <input
+                                    id="debt-name"
+                                    name="debt_name"
+                                    type="text"
+                                    class="form-control rounded" {# Added rounded #}
+                                    placeholder="e.g., Student Loan, Credit Card"
+                                    required
+                                    autocomplete="off"
+                                >
+                            </div>
+                            <div class="mb-3">
+                                <label for="debt-type" class="form-label fw-bold text-muted">Debt Type</label> {# Added fw-bold text-muted #}
+                                <select id="debt-type" name="debt_type" class="form-select rounded" required> {# Added rounded #}
+                                    <option disabled selected value="">-- Select Debt Type --</option>
+                                    {% for type in debt_types %}
+                                        <option value="{{ type }}">{{ type }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="current-balance" class="form-label fw-bold text-muted">Current Balance</label> {# Added fw-bold text-muted #}
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input
+                                        id="current-balance"
+                                        name="current_balance"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        class="form-control rounded-end" {# Added rounded-end #}
+                                        placeholder="e.g., 18000.50"
+                                        required
+                                        autocomplete="off"
+                                    >
+                                </div>
+                            </div>
+                            <div class="mb-4"> {# Increased margin-bottom #}
+                                <label for="due-date" class="form-label fw-bold text-muted">Next Due Date</label> {# Added fw-bold text-muted #}
+                                <input type="date" class="form-control rounded" id="due-date" name="due_date"> {# Added rounded #}
+                            </div>
+                            <button type="submit" class="btn btn-success-themed w-100 btn-lg rounded-pill"> {# Added btn-lg rounded-pill #}
+                                <i class="fas fa-plus-circle me-2"></i> Add Debt
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Half: Debt Overview Table -->
+            <div class="col-md-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect"> {# Added shadow-lg, rounded-xl, glass-effect #}
+                    <div class="card-header card-header-gradient py-3"> {# Matched other pages card-header style #}
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-hand-holding-usd me-2"></i> Your Debts Overview</h5> {# Added icon and fw-bold #}
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column"> {# Adjusted padding and added flex-column #}
+                        {% if debt_items %}
+                            <div class="table-responsive flex-grow-1"> {# Added flex-grow-1 #}
+                                <table class="table table-hover align-middle"> {# Added align-middle #}
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col" class="text-end">Balance ($)</th>
+                                            <th scope="col" class="text-end">Due Date</th>
+                                            <th scope="col" class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in debt_items %}
+                                            <tr>
+                                                <td>{{ item.debt_name }}</td>
+                                                <td>{{ item.debt_type }}</td>
+                                                <td class="text-end currency-display" data-raw-value="{{ item.current_balance }}"></td> {# Added currency-display #}
+                                                <td class="text-end">{% if item.due_date %}{{ item.due_date }}{% else %}N/A{% endif %}</td>
+                                                <td class="text-end">
+                                                    <!-- Edit Button (Triggers Modal) -->
+                                                    <button class="btn btn-sm btn-outline-primary edit-debt-btn rounded-pill" {# Added rounded-pill #}
+                                                            data-bs-toggle="modal" data-bs-target="#editDebtModal"
+                                                            data-id="{{ item.id }}"
+                                                            data-debt-name="{{ item.debt_name }}"
+                                                            data-debt-type="{{ item.debt_type }}"
+                                                            data-current-balance="{{ item.current_balance }}"
+                                                            data-due-date="{{ item.due_date | default('') }}"
+                                                            title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <!-- Delete Button (Triggers Confirmation) -->
+                                                    <button class="btn btn-sm btn-outline-danger delete-debt-btn rounded-pill ms-2" {# Added rounded-pill ms-2 #}
+                                                            data-id="{{ item.id }}"
+                                                            data-debt-name="{{ item.debt_name }}"
+                                                            title="Delete"
+                                                            data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr class="fw-bold">
+                                            <td colspan="2">Total Current Liabilities:</td>
+                                            <td class="text-end currency-display" data-raw-value="{{ total_liabilities }}"></td> {# Added currency-display #}
+                                            <td colspan="2"></td> {# Empty cells for alignment #}
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-5 my-auto">No debt items added yet. Use the form on the left to add your first debt!</p> {# Adjusted text and classes #}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Edit Debt Modal -->
+<div class="modal fade" id="editDebtModal" tabindex="-1" aria-labelledby="editDebtModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card rounded-xl glass-effect"> {# Added card, rounded-xl, glass-effect #}
+            <div class="modal-header card-header-gradient py-3"> {# Applied gradient class #}
+                <h5 class="modal-title fw-bold" id="editDebtModalLabel">Edit Debt Item</h5> {# Added fw-bold #}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editDebtForm" method="post">
+                <div class="modal-body p-4"> {# Adjusted padding #}
+                    <input type="hidden" id="editDebtId" name="id">
+                    <div class="mb-3">
+                        <label for="editDebtName" class="form-label fw-bold text-muted">Debt Name</label> {# Added fw-bold text-muted #}
+                        <input type="text" class="form-control rounded" id="editDebtName" name="debt_name" required> {# Added rounded #}
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDebtType" class="form-label fw-bold text-muted">Debt Type</label> {# Added fw-bold text-muted #}
+                        <select id="editDebtType" name="debt_type" class="form-select rounded" required> {# Added rounded #}
+                            {% for type in debt_types %}
+                                <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCurrentBalance" class="form-label fw-bold text-muted">Current Balance</label> {# Added fw-bold text-muted #}
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control rounded-end" id="editCurrentBalance" name="current_balance" step="0.01" min="0" required> {# Added rounded-end #}
+                        </div>
+                    </div>
+                    <div class="mb-4"> {# Increased margin-bottom #}
+                        <label for="editDueDate" class="form-label fw-bold text-muted">Next Due Date</label> {# Added fw-bold text-muted #}
+                        <input type="date" class="form-control rounded" id="editDueDate" name="due_date"> {# Added rounded #}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button> {# Added rounded-pill #}
+                    <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button> {# Added rounded-pill #}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card rounded-xl glass-effect"> {# Added card, rounded-xl, glass-effect #}
+            <div class="modal-header bg-danger text-white py-3"> {# Applied bg-danger and padding #}
+                <h5 class="modal-title fw-bold" id="deleteConfirmationModalLabel">Confirm Deletion</h5> {# Added fw-bold #}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4"> {# Adjusted padding #}
+                Are you sure you want to delete the debt item for "<span id="deleteDebtNameSpan" class="fw-bold text-danger"></span>"? This action cannot be undone. {# Added fw-bold text-danger #}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button> {# Added rounded-pill #}
+                <form id="deleteDebtForm" method="post" style="display:inline;">
+                    <input type="hidden" id="deleteDebtId" name="id">
+                    <button type="submit" class="btn btn-danger rounded-pill">Delete</button> {# Added rounded-pill #}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to format numbers as currency without .00 if it's a whole number
+        function formatCurrency(value) {
+            if (value === undefined || value === null || isNaN(value)) {
+                return '$0';
+            }
+            const numberValue = parseFloat(value);
+            // Check if it's a whole number
+            if (numberValue % 1 === 0) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0, // No decimal digits for whole numbers
+                    maximumFractionDigits: 0
+                }).format(numberValue);
+            } else {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2, // Always show 2 decimal digits for non-whole numbers
+                    maximumFractionDigits: 2
+                }).format(numberValue);
+            }
+        }
+
+        // Function to find all elements with data-raw-value and format them
+        function formatCurrencyDisplays() {
+            document.querySelectorAll('.currency-display').forEach(element => {
+                const rawValue = parseFloat(element.getAttribute('data-raw-value'));
+                element.textContent = formatCurrency(rawValue);
+            });
+        }
+
+        // Call formatting function on DOMContentLoaded
+        formatCurrencyDisplays();
+
+        // Handle Edit Debt Button Click to populate modal
+        const editDebtModal = document.getElementById('editDebtModal');
+        if (editDebtModal) {
+            editDebtModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; // Button that triggered the modal
+                const id = button.getAttribute('data-id');
+                const debtName = button.getAttribute('data-debt-name');
+                const debtType = button.getAttribute('data-debt-type');
+                const currentBalance = button.getAttribute('data-current-balance');
+                const dueDate = button.getAttribute('data-due-date');
+
+                // Update the modal's content
+                const modalTitle = editDebtModal.querySelector('.modal-title');
+                const editDebtId = editDebtModal.querySelector('#editDebtId');
+                const editDebtNameInput = editDebtModal.querySelector('#editDebtName');
+                const editDebtTypeSelect = editDebtModal.querySelector('#editDebtType');
+                const editCurrentBalanceInput = editDebtModal.querySelector('#editCurrentBalance');
+                const editDueDateInput = editDebtModal.querySelector('#editDueDate');
+                const editDebtForm = editDebtModal.querySelector('#editDebtForm');
+
+                modalTitle.textContent = 'Edit Debt Item: ' + debtName;
+                editDebtId.value = id;
+                editDebtNameInput.value = debtName;
+                editDebtTypeSelect.value = debtType; // Select the correct option
+                editCurrentBalanceInput.value = parseFloat(currentBalance).toFixed(2);
+                editDueDateInput.value = dueDate;
+
+                // Set the form action dynamically
+                editDebtForm.action = `/debt/edit/${id}`;
+            });
+        }
+
+        // Handle Delete Debt Button Click to populate confirmation modal
+        const deleteConfirmationModal = document.getElementById('deleteConfirmationModal');
+        if (deleteConfirmationModal) {
+            deleteConfirmationModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const debtName = button.getAttribute('data-debt-name');
+
+                // Update the modal's content
+                const deleteDebtNameSpan = deleteConfirmationModal.querySelector('#deleteDebtNameSpan');
+                const deleteDebtId = deleteConfirmationModal.querySelector('#deleteDebtId');
+                const deleteDebtForm = deleteConfirmationModal.querySelector('#deleteDebtForm');
+
+                deleteDebtNameSpan.textContent = debtName;
+                deleteDebtId.value = id;
+
+                // Set the form action dynamically
+                deleteDebtForm.action = `/debt/delete/${id}`;
+            });
+        }
+    });
+</script>
+{% endblock %}

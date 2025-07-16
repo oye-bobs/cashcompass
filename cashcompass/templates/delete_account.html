@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Delete Account
+{% endblock %}
+
+{% block main %}
+    {# Link to the external profile-specific stylesheet #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/profile.css') }}">
+
+    
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
+                <div class="card shadow-lg border-0 rounded-xl overflow-hidden glass-effect"> {# Applied deeper shadow, rounded-xl, and glass effect #}
+                    {# Changed header class to delete-header-gradient for a distinct look #}
+                    <div class="card-header text-white text-center py-4 delete-header-gradient">
+                        <i class="fas fa-exclamation-triangle fa-4x mb-3 text-white"></i> {# Warning icon, ensured white color #}
+                        <h2 class="h3 mb-0 text-white fw-bold">Delete Account</h2> {# Made title bold #}
+                    </div>
+                    <div class="card-body p-4 p-md-5"> {# Consistent padding #}
+                        <div class="text-center mb-5">
+                            <p class="text-danger lead mb-3 fw-bold text-gradient"> {# Applied text-gradient for emphasis #}
+                                <i class="fas fa-radiation-alt me-2"></i> Warning: This action is irreversible!
+                            </p>
+                            <p class="text-muted">
+                                To confirm account deletion, please enter your password below.
+                                All your financial data, including budget, expenses, income, savings, and debt, will be permanently removed.
+                            </p>
+                        </div>
+
+                        <form action="/profile/delete_account" method="post">
+                            <div class="form-floating mb-3 position-relative"> {# Added position-relative for password toggle #}
+                                <input
+                                    type="password"
+                                    class="form-control rounded-lg pe-5" {# Ensured consistent rounded corners and padding for inputs #}
+                                    id="password"
+                                    name="password"
+                                    placeholder="Enter your password"
+                                    required
+                                    autocomplete="off"
+                                >
+                                <label for="password">Enter your password</label>
+                                <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" id="togglePassword" style="z-index: 100;"> {# Added ID for password toggle #}
+                                    <i class="far fa-eye text-muted" id="passwordEyeIcon"></i> {# Added ID for eye icon #}
+                                </button>
+                            </div>
+                            <div class="d-grid gap-3">
+                                <button type="submit" class="btn btn-danger btn-lg rounded-pill shadow-sm animate-hover-lift"> {# Applied pill shape, shadow, and hover effect #}
+                                    <i class="fas fa-trash-alt me-2"></i> Confirm Account Deletion
+                                </button>
+                                <a href="/profile" class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm animate-hover-lift"> {# Applied pill shape, shadow, and hover effect #}
+                                    <i class="fas fa-arrow-left me-2"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for password toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.getElementById('togglePassword');
+            const password = document.getElementById('password');
+            const passwordEyeIcon = document.getElementById('passwordEyeIcon');
+
+            if (togglePassword && password && passwordEyeIcon) {
+                togglePassword.addEventListener('click', function() {
+                    // Toggle the type attribute
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+
+                    // Toggle the eye icon
+                    passwordEyeIcon.classList.toggle('fa-eye');
+                    passwordEyeIcon.classList.toggle('fa-eye-slash');
+                });
+            }
+        });
+    </script>
+{% endblock %}

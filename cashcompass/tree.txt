@@ -1,0 +1,34 @@
+
+Cash_compass/
+│
+├── .env                       # Environment variables for API keys and sensitive info
+├── app.py                     # Main Flask app (Includes API key check for AI Advisor route, loads .env)
+├── requirements.txt           # Updated: Includes python-dotenv, Flask-Session, Werkzeug, cs50
+├── helpers.py                 # Custom utility functions (Updated: _get_all_financial_metrics now matches dashboard data, uses datetime and math)
+│
+├── static/                    # Static files (CSS, JS, images)
+│   ├── style.css              # Updated: Includes profile header gradient, animate-hover-lift, and refined button styles (all custom page styles are assumed to be here now)
+│   └── script.js              # Updated: Contains centralized password toggle logic
+│
+├── templates/                 # HTML files (Jinja templates)
+│   ├── layout.html            # Updated: Alert badge positioning adjusted
+│   ├── dashboard.html         # Renamed from 'index.html' for clarity and consistency with app.py routes
+│   ├── login.html
+│   ├── register.html
+│   ├── budget.html            # Add/view budget
+│   ├── expenses.html          # Add/view expenses
+│   ├── income.html            # Added: (Implied by app.py income routes)
+│   ├── savings.html           # Added: (Implied by app.py savings routes)
+│   ├── debt.html              # Added: (Implied by app.py debt routes)
+│   ├── profile.html           # Updated: Styled to fit CashCompass theme, relies on style.css for custom styles
+│   ├── edit_profile.html      # Updated: Styled to fit CashCompass theme, relies on style.css for custom styles
+│   ├── delete_account.html    # Updated: Styled to fit CashCompass theme, relies on style.css for custom styles
+│   ├── settings.html          # Updated: Styled to fit CashCompass theme, relies on style.css for custom styles
+│   ├── forgot_password.html   # NEW: Standalone template for forgot password functionality
+│   ├── savings_dashboard.html # Added: (Implied by app.py savings_dashboard route)
+│   └── ai_advisor.html        # Template for the AI Financial Advisor page
+│
+├── database.db                # SQLite database file
+│
+└── README.md                  # Updated: Project description/instructions, including .env setup
+```

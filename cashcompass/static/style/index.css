@@ -1,0 +1,156 @@
+/* CSS Variables from layout.html for consistency */
+        :root {
+            --primary-color: #2563eb; /* A shade of blue */
+            --secondary-color: #1e40af; /* A darker shade of blue */
+            --border-radius: 0.75rem; /* Rounded-xl equivalent */
+        }
+
+        /* Custom gradient backgrounds for summary cards to match app's aesthetic */
+        .bg-gradient-income {
+            background: linear-gradient(135deg, #0891b2, #056a85) !important; /* Brighter info-like blue */
+        }
+        .bg-gradient-expenses {
+            background: linear-gradient(135deg, #dc2626, #991b1b) !important; /* Stronger danger-like red */
+        }
+        .bg-gradient-net-balance {
+            background: linear-gradient(135deg, #16a34a, #107538) !important; /* Vibrant success-like green */
+        }
+        .bg-gradient-savings {
+            background: linear-gradient(135deg, #d97706, #a36104) !important; /* Warm warning-like orange */
+        }
+
+        /* Gradient for chart card headers */
+        .card-header-chart-gradient {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important; /* Primary blue gradient using CSS variables */
+            color: white; /* Ensure text is white on this dark gradient */
+        }
+
+        /* Further enhancements for cards and typography */
+        .card-summary-value {
+            font-size: 2.1rem; /* Slightly smaller font for main values to accommodate larger numbers */
+            font-weight: 700;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff; /* White text for gradient cards */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2); /* Subtle text shadow for readability */
+            white-space: nowrap; /* Prevent wrapping unless explicitly broken by overflow */
+            overflow: hidden; /* Hide overflowing text */
+            text-overflow: ellipsis; /* Add ellipsis for overflow */
+            line-height: 1.1; /* Adjusted line height for cleaner single line */
+        }
+        .card-summary-title {
+            font-size: 1.1rem; /* Slightly smaller title for more room */
+            font-weight: 500;
+            color: rgba(255,255,255,0.8); /* Slightly transparent white for titles */
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px; /* Consistent height for charts */
+            width: 100%;
+            padding: 1rem; /* Padding inside chart container */
+        }
+
+        /* Enhancements for list group items in Budget vs. Actual */
+        .list-group-item strong {
+            color: #334155; /* Default text color for category name */
+        }
+        .list-group-item small {
+            color: #64748b; /* Muted text for sub-info */
+        }
+        .list-group-item .fs-6 {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        /* Chart.js custom tooltip styling (if needed, otherwise default is good) */
+        .chartjs-tooltip {
+            background-color: rgba(0,0,0,0.8);
+            border-radius: var(--border-radius);
+            padding: 10px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        /* Animation for card hover */
+        .animate-card-hover {
+            transition: all 0.3s ease;
+        }
+        .animate-card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.25);
+        }
+
+        /* Month Selector specific styling */
+        .month-selector-container {
+            background: var(--primary-color); /* Match app's primary theme color */
+            border: 1px solid var(--secondary-color); /* Slightly darker border */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+            padding: 0.8rem 1.5rem; /* Increased padding */
+            color: white; /* Ensure text is white */
+        }
+
+        .month-selector-label {
+            font-size: 1.05rem; /* Increased font size */
+            color: white; /* White text color */
+            font-weight: 600;
+        }
+
+        .month-select-dropdown {
+            font-size: 0.95rem; /* Slightly larger text in dropdown */
+            padding: 0.5rem 1rem;
+            background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white background */
+            color: white; /* White text in dropdown */
+            border: 1px solid rgba(255, 255, 255, 0.4); /* Lighter border */
+            border-radius: 0.5rem; /* Slightly rounded for dropdown */
+            appearance: none; /* Remove default arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"); /* Custom white arrow */
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .month-select-dropdown:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .month-select-dropdown option {
+            color: #334155; /* Darker text for options in the dropdown list */
+            background-color: white; /* White background for options */
+        }
+
+        /* Position and size adjustments for icons in summary cards */
+        .card-summary-icon {
+            position: absolute;
+            right: 1.5rem; /* Adjusted right position */
+            bottom: 0.75rem; /* Adjusted bottom position */
+            font-size: 3.8rem; /* Slightly larger icon */
+            opacity: 0.3; /* More visible opacity */
+        }
+
+
+        @media (max-width: 768px) {
+            .card-summary-value {
+                font-size: 1.8rem; /* Smaller font on mobile for very long numbers */
+            }
+            .card-summary-title {
+                font-size: 1rem;
+            }
+            .month-selector-container {
+                padding: 0.6rem 1rem;
+            }
+            .month-selector-label {
+                font-size: 0.9rem;
+            }
+            .month-select-dropdown {
+                font-size: 0.85rem;
+            }
+            .card-summary-icon {
+                font-size: 3rem;
+                right: 1rem;
+                bottom: 0.5rem;
+            }
+        }

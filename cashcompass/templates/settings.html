@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Settings
+{% endblock %}
+
+{% block main %}
+    {# Link to the external profile-specific stylesheet, which includes shared styles #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/profile.css') }}">
+
+    <style>
+        /* Specific styles for the settings page header */
+        .settings-header-gradient {
+            /* A cool blue/purple gradient for the settings page header */
+            background: linear-gradient(to right, #6a11cb, #2575fc); /* Example: Deep purple to vibrant blue */
+            color: #fff;
+            border-top-left-radius: 20px; /* Match parent's border-radius */
+            border-top-right-radius: 20px;
+        }
+        /* Ensure specific styles for password toggle are here or in profile.css if shared */
+        .btn-link {
+            text-decoration: none;
+        }
+    </style>
+
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-7">
+                <div class="card shadow-lg border-0 rounded-xl overflow-hidden glass-effect"> {# Applied deeper shadow, rounded-xl, and glass effect #}
+                    {# Changed header class to settings-header-gradient for a distinct look #}
+                    <div class="card-header text-white text-center py-4 settings-header-gradient">
+                        <i class="fas fa-cog fa-4x mb-3 text-white"></i> {# Settings icon, ensured white color #}
+                        <h2 class="h3 mb-0 text-white fw-bold">Account Settings</h2> {# Made title bold #}
+                    </div>
+                    <div class="card-body p-4 p-md-5"> {# Consistent padding #}
+                        <div class="text-center mb-5">
+                            {# Applied text-gradient and larger font size #}
+                            <h4 class="card-title fw-bold text-gradient display-6">Manage Your Preferences</h4>
+                            <p class="text-muted mb-0">Update your account information and security settings.</p>
+                        </div>
+
+                        {# Display User Email (Read-only for now) #}
+                        <h5 class="fw-bold text-dark mb-3 text-center text-gradient">User Information</h5> {# Centered and applied gradient to heading #}
+                        <ul class="list-group list-group-flush mb-5 rounded-lg border shadow-sm"> {# Added border, shadow, and rounded corners to the list group #}
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3"> {# Added py-3 for more spacing #}
+                                <span class="fw-bold text-dark">Username:</span>
+                                <span class="text-muted fw-semibold">{{ user.username | default("N/A") }}</span> {# Added fw-semibold for value #}
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <span class="fw-bold text-dark">Email:</span>
+                                <span class="text-muted fw-semibold">{{ user.email | default("N/A") }}</span>
+                            </li>
+                        </ul>
+
+                        {# Change Password Form #}
+                        <h5 class="fw-bold text-dark mb-3 text-center text-gradient">Change Password</h5> {# Centered and applied gradient to heading #}
+                        <form action="/settings" method="post">
+                            <div class="form-floating mb-3 position-relative"> {# Added position-relative for password toggles #}
+                                <input
+                                    type="password"
+                                    class="form-control rounded-lg pe-5" {# Ensured consistent rounded corners and padding for inputs #}
+                                    id="current_password"
+                                    name="current_password"
+                                    placeholder="Current Password"
+                                    required
+                                    autocomplete="off"
+                                >
+                                <label for="current_password">Current Password</label>
+                                <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" id="toggleCurrentPassword" style="z-index: 100;"> {# Unique ID #}
+                                    <i class="far fa-eye text-muted" id="currentPasswordEyeIcon"></i> {# Unique ID #}
+                                </button>
+                            </div>
+                            <div class="form-floating mb-3 position-relative"> {# Added position-relative for password toggles #}
+                                <input
+                                    type="password"
+                                    class="form-control rounded-lg pe-5" {# Ensured consistent rounded corners and padding for inputs #}
+                                    id="new_password"
+                                    name="new_password"
+                                    placeholder="New Password"
+                                    required
+                                >
+                                <label for="new_password">New Password</label>
+                                <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" id="toggleNewPassword" style="z-index: 100;"> {# Unique ID #}
+                                    <i class="far fa-eye text-muted" id="newPasswordEyeIcon"></i> {# Unique ID #}
+                                </button>
+                            </div>
+                            <div class="form-floating mb-4 position-relative"> {# Added position-relative for password toggles #}
+                                <input
+                                    type="password"
+                                    class="form-control rounded-lg pe-5" {# Ensured consistent rounded corners and padding for inputs #}
+                                    id="confirmation"
+                                    name="confirmation"
+                                    placeholder="Confirm New Password"
+                                    required
+                                >
+                                <label for="confirmation">Confirm New Password</label>
+                                <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-2" id="toggleConfirmation" style="z-index: 100;"> {# Reused existing confirmation ID #}
+                                    <i class="far fa-eye text-muted" id="confirmationEyeIcon"></i> {# Reused existing confirmation ID #}
+                                </button>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm animate-hover-lift"> {# Applied pill shape, shadow, and hover effect #}
+                                    <i class="fas fa-save me-2"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Removed the inline script block, relying on script.js for password toggles #}
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}

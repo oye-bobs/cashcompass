@@ -1,0 +1,200 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    AI Financial Advisor
+{% endblock %}
+
+{% block main %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/financial_advisor.css') }}">
+
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-9">
+                <div class="card shadow-lg border-0 rounded-xl overflow-hidden glass-effect mb-4">
+                    <div class="card-header text-white text-center rounded-top-xl ai-advisor-header-gradient">
+                        <i class="fas fa-chart-line fa-4x mb-3 text-white"></i>
+                        <h2 class="display-5 mb-0 text-white fw-bold">AI Financial Advisor</h2>
+                        <p class="lead mb-0 text-white-75">Get personalized financial guidance powered by advanced AI</p>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+
+                        <!-- Features Section -->
+                        <ul class="feature-list mb-5">
+                            <li class="feature-item">
+                                <i class="fas fa-brain"></i>
+                                <h6>AI-Powered Analysis</h6>
+                                <small class="text-muted">Advanced algorithms analyze your financial data</small>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <h6>Secure & Private</h6>
+                                <small class="text-muted">Your data is processed securely and privately</small>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fas fa-target"></i>
+                                <h6>Personalized Advice</h6>
+                                <small class="text-muted">Tailored recommendations for your situation</small>
+                            </li>
+                            <li class="feature-item">
+                                <i class="fas fa-download"></i>
+                                <h6>Downloadable Reports</h6>
+                                <small class="text-muted">Save and share your financial insights</small>
+                            </li>
+                        </ul>
+
+                        <!-- Main Advice Card -->
+                        <div class="advice-card card glass-effect">
+                            <div class="card-header card-header-gradient rounded-top-xl py-3">
+                                <h5 class="card-title mb-0 fw-bold">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    Your Personalized Financial Insights
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                {% if financial_advice %}
+                                    {# Display the AI-generated advice #}
+                                    <div id="adviceContent" class="financial-advice-output">
+                                        {{ financial_advice | safe }} {# Render HTML directly from Flask #}
+                                    </div>
+                                {% else %}
+                                    {# Default State when no advice is generated yet #}
+                                    <div id="defaultState" class="text-center py-5">
+                                        <i class="fas fa-rocket text-gradient" style="font-size: 3.5rem; margin-bottom: 1.5rem;"></i>
+                                        <h4 class="text-dark mb-3 fw-bold">Ready to Transform Your Financial Future?</h4>
+                                        <p class="text-muted px-lg-5">Click the button below to receive comprehensive, AI-powered financial advice tailored specifically to your situation based on your recorded transactions.</p>
+                                    </div>
+                                {% endif %}
+
+                                {# Loading State (Client-side display when form is submitted) #}
+                                <div id="loadingIndicator" class="text-center py-5 {% if not show_loading %}d-none{% endif %}">
+                                    <div class="loading-spinner mx-auto mb-3"></div>
+                                    <h5 class="text-gradient fw-bold">Analyzing Your Financial Data</h5>
+                                    <p class="text-muted">Our AI is reviewing your information and preparing personalized recommendations. This may take a moment...</p>
+                                    <div class="progress mx-auto mt-4" style="width: 250px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+
+                                {# Error State (Can be managed by Flask flash messages or passed as a flag) #}
+                                <div id="errorDisplay" class="alert alert-danger d-none" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-exclamation-triangle me-3" style="font-size: 1.5rem;"></i>
+                                        <div>
+                                            <h6 class="alert-heading mb-1 fw-bold">Oops! Something went wrong</h6>
+                                            <span id="errorMessage"></span>
+                                        </div>
+                                    </div>
+                                    <div class="retry-section">
+                                        {# This button would trigger a form submission to re-try #}
+                                        <form action="/financial_advisor" method="post" class="d-inline-block">
+                                            <button type="submit" class="btn btn-outline-danger btn-lg rounded-pill animate-hover-lift">
+                                                <i class="fas fa-redo me-2"></i>Try Again
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="text-center mt-4 d-flex justify-content-center flex-wrap gap-3">
+                                    {% if not financial_advice %}
+                                        {# Show Generate button if no advice yet #}
+                                        <form action="/financial_advisor" method="post" class="d-inline-block" id="getAdviceForm">
+                                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm animate-hover-lift" id="getAdviceButton">
+                                                <i class="fas fa-magic me-2"></i>Generate Financial Advice
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        {# Show Download and New Analysis buttons if advice is present #}
+                                        <button type="button" class="btn btn-success btn-lg rounded-pill shadow-sm animate-hover-lift" id="downloadReportButton">
+                                            <i class="fas fa-download me-2"></i>Download Report
+                                        </button>
+                                        <form action="/financial_advisor" method="get" class="d-inline-block">
+                                            <button type="submit" class="btn btn-outline-primary btn-lg rounded-pill shadow-sm animate-hover-lift" id="newAnalysisButton">
+                                                <i class="fas fa-refresh me-2"></i>New Analysis
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadReportButton = document.getElementById('downloadReportButton');
+            const adviceContent = document.getElementById('adviceContent');
+            const getAdviceForm = document.getElementById('getAdviceForm');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const defaultState = document.getElementById('defaultState');
+            const errorMessageSpan = document.getElementById('errorMessage'); // Added for client-side error display
+            const errorDisplay = document.getElementById('errorDisplay'); // Added for client-side error display
+
+
+            // --- Download Report Functionality (Plain Text) ---
+            if (downloadReportButton) { // Ensure button exists
+                downloadReportButton.addEventListener('click', function() {
+                    console.log("Preparing to download report (plain text)...");
+                    const reportContent = adviceContent.innerText; // Get plain text content from the advice div
+                    const timestamp = new Date().toISOString().split('T')[0];
+                    const filename = `CashCompass_Financial_Advice_Report_${timestamp}.txt`;
+
+                    if (!reportContent || reportContent.trim() === '') {
+                        console.warn("No content to download. Advice content is empty.");
+                        errorMessageSpan.textContent = "Cannot download empty report. Please generate advice first.";
+                        errorDisplay.classList.remove('d-none');
+                        return;
+                    }
+
+                    try {
+                        const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = filename;
+                        document.body.appendChild(link); // Append to body for Firefox compatibility
+                        console.log("Attempting to create and click download link.");
+                        link.click();
+                        document.body.removeChild(link); // Clean up
+                        URL.revokeObjectURL(link.href); // Clean up the URL object
+
+                        // Optional: Provide visual feedback on download success
+                        const originalText = downloadReportButton.innerHTML;
+                        downloadReportButton.innerHTML = '<i class="fas fa-check me-2"></i>Downloaded!';
+                        downloadReportButton.classList.remove('btn-success');
+                        downloadReportButton.classList.add('btn-outline-success');
+
+                        setTimeout(() => {
+                            downloadReportButton.innerHTML = originalText;
+                            downloadReportButton.classList.remove('btn-outline-success');
+                            downloadReportButton.classList.add('btn-success');
+                        }, 2000);
+
+                    } catch (downloadError) {
+                        console.error("Error during download process:", downloadError);
+                        errorMessageSpan.textContent = `Failed to download report: ${downloadError.message}.`;
+                        errorDisplay.classList.remove('d-none');
+                    }
+                });
+            }
+
+            // --- Cosmetic Loading Indicator for Flask form submission ---
+            // When the "Generate Financial Advice" form is submitted, show loading indicator
+            if (getAdviceForm) {
+                getAdviceForm.addEventListener('submit', function() {
+                    if (defaultState) {
+                        defaultState.classList.add('d-none'); // Hide default message
+                    }
+                    if (loadingIndicator) {
+                        loadingIndicator.classList.remove('d-none'); // Show loading spinner
+                    }
+                    if (errorDisplay) {
+                        errorDisplay.classList.add('d-none'); // Hide any previous error messages
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

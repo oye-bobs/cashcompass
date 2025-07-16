@@ -1,0 +1,117 @@
+/* CSS Variables from layout.html for consistency */
+        :root {
+            --primary-color: #2563eb; /* A shade of blue */
+            --secondary-color: #1e40af; /* A darker shade of blue */
+            --border-radius: 0.75rem; /* Rounded-xl equivalent */
+        }
+
+        /* Gradient for card headers to match dashboard chart headers */
+        .card-header-gradient {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+            color: white; /* Ensure text is white on this dark gradient */
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+        }
+
+        /* Consistent card styling */
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* Ensures content respects rounded corners */
+        }
+
+        /* Input group text styling */
+        .input-group-text {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            border-right: none; /* No border on the right to blend with input */
+        }
+
+        /* Form control styling */
+        .form-control {
+            border-radius: 0.25rem; /* Slightly rounded for inputs */
+            border-left: none; /* No border on the left to blend with input-group-text */
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+            border-color: var(--primary-color);
+        }
+
+        /* Button styling */
+        .btn-success-themed {
+            background: linear-gradient(135deg, #10b981, #059669); /* Green gradient for Add Expense */
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+        .btn-success-themed:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Table header styling */
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom: none; /* Remove default table header border */
+        }
+
+        /* Table footer styling */
+        .table tfoot tr {
+            background-color: var(--primary-color); /* Darker footer */
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Custom styling for the month selector in the overview */
+        .view-month-selector-container {
+            background: rgba(var(--primary-color-rgb), 0.1); /* Light blue tint */
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(var(--primary-color-rgb), 0.2);
+        }
+        .view-month-selector-label {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        .view-month-select-dropdown {
+            border: none;
+            background-color: transparent;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        .view-month-select-dropdown:focus {
+            box-shadow: none;
+        }
+        .view-month-select-dropdown option {
+            color: #334155; /* Darker text for options in the dropdown list */
+            background-color: white; /* White background for options */
+        }
+
+        /* Ensuring h-100 on card wrapper works */
+        .col-md-6 > .card {
+            min-height: 500px; /* Example fixed height for demonstration, adjust as needed */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .col-md-6 {
+                margin-bottom: 1.5rem; /* Add spacing between stacked columns on mobile */
+            }
+            .col-md-6:last-child {
+                margin-bottom: 0;
+            }
+            .card-body {
+                padding: 1.5rem; /* Adjust padding on smaller screens */
+            }
+            .table-responsive {
+                border-radius: var(--border-radius); /* Apply border-radius to table container */
+                overflow: hidden; /* Ensure clipping of table borders */
+            }
+            .col-md-6 > .card {
+                 min-height: auto; /* Remove fixed height on mobile if not suitable */
+            }
+        }

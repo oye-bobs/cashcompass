@@ -1,0 +1,647 @@
+/* Custom CSS for CashCompass Application */
+
+/* CSS Variables for consistent styling */
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #1e40af;
+    --success-color: #16a34a;
+    --warning-color: #d97706;
+    --danger-color: #dc2626;
+    --info-color: #0891b2;
+    --light-bg: #f8fafc;
+    --dark-bg: #0f172a;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --card-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --border-radius: 12px;
+    --sidebar-full-width: 280px; /* Full width for expanded sidebar */
+    --sidebar-collapsed-width: 80px; /* Width when only icons are visible */
+    --navbar-height: 70px;
+}
+
+/* Universal box-sizing for consistent layouts */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Base body styles */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Gradient background */
+    min-height: 100vh; /* Full viewport height */
+    color: #334155; /* Default text color */
+    font-weight: 400;
+    /* Hide overflow-x to prevent horizontal scrollbar during sidebar transitions */
+    overflow-x: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0; /* Always positioned at left: 0 */
+    height: 100vh; /* Full viewport height */
+    width: var(--sidebar-full-width); /* Default to full width */
+    background: linear-gradient(180deg, var(--dark-bg) 0%, #1e293b 100%); /* Dark gradient background */
+    color: white;
+    padding: 2rem 0;
+    box-shadow: var(--card-shadow-lg);
+    z-index: 1040; /* Lower than navbar so navbar is always on top */
+    transition: transform 0.3s ease, width 0.3s ease; /* Smooth transition for width and transform */
+    overflow-y: auto; /* Enable scrolling for long content */
+    overflow-x: hidden; /* Hide horizontal overflow, especially for collapsing text */
+}
+
+/* Sidebar collapsed state (icons only) */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width); /* Narrower width for icons only */
+    /* text content will be hidden by individual .nav-link span rules */
+}
+
+/* Sidebar navigation padding */
+.sidebar .nav {
+    padding: 0 1rem;
+}
+
+/* Sidebar navigation item margin */
+.sidebar .nav-item {
+    margin-bottom: 0.5rem;
+}
+
+/* Sidebar navigation link styling */
+.sidebar .nav-link {
+    color: #cbd5e1; /* Light grey text */
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Sidebar navigation link hover effect */
+.sidebar .nav-link:hover {
+    background: rgba(59, 130, 246, 0.1); /* Light blue background */
+    color: #60a5fa; /* Lighter blue text */
+    transform: translateX(4px); /* Slight horizontal slide */
+}
+
+/* Active sidebar navigation link styling */
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); /* Primary gradient background */
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); /* Subtle shadow */
+}
+
+/* Sidebar navigation link icon styling */
+.sidebar .nav-link i {
+    margin-right: 1rem; /* Space between icon and text */
+    width: 20px; /* Fixed width for icon container */
+    text-align: center;
+    font-size: 1.1rem;
+    transition: margin-right 0.3s ease; /* Transition for icon margin */
+}
+
+/* Hide text and adjust icon margin when sidebar is collapsed */
+.sidebar.collapsed .nav-link span {
+    opacity: 0; /* Fade out text */
+    width: 0; /* Collapse text space */
+    overflow: hidden; /* Ensure text is clipped if it tries to appear */
+    transition: opacity 0.3s ease, width 0.3s ease;
+}
+
+.sidebar.collapsed .nav-link i {
+    margin-right: 0; /* Remove margin when text is gone */
+}
+
+/* Sidebar brand section */
+.sidebar-brand {
+    padding: 1rem 1.5rem 2rem;
+    text-align: center;
+    border-bottom: 1px solid #334155; /* Separator line */
+    margin-bottom: 1rem;
+    display: flex; /* Use flex for brand alignment */
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition: opacity 0.3s ease; /* Transition brand opacity */
+}
+
+/* Hide sidebar brand text when collapsed */
+.sidebar.collapsed .sidebar-brand h4,
+.sidebar.collapsed .sidebar-brand small {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    line-height: 0;
+    transition: opacity 0.3s ease, height 0.3s ease;
+}
+.sidebar.collapsed .sidebar-brand {
+    padding: 1rem 0; /* Adjust padding for collapsed state */
+}
+
+
+/* Main Content Wrapper */
+.main-content-wrapper {
+    margin-left: var(--sidebar-full-width); /* Initial margin for expanded sidebar */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease; /* Smooth margin transition */
+}
+
+/* Main content wrapper when sidebar is collapsed (icons only) */
+.main-content-wrapper.sidebar-collapsed-view { /* New class for this state */
+    margin-left: var(--sidebar-collapsed-width); /* Shift by collapsed width */
+}
+
+/* Navbar Styles */
+.navbar {
+    background: rgba(255, 255, 255, 0.95) !important; /* Semi-transparent white background */
+    backdrop-filter: blur(10px); /* Frosted glass effect */
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: var(--card-shadow);
+    height: var(--navbar-height);
+    position: sticky; /* Sticky position at the top */
+    top: 0;
+    z-index: 1050; /* HIGHER Z-INDEX to stay on top of sidebar */
+}
+
+/* Navbar brand (app name) */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--primary-color) !important;
+    text-decoration: none;
+}
+
+/* Navbar sidebar toggler button */
+.navbar-toggler-sidebar {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+    /* Ensure it's not hidden by main content wrapper on mobile */
+    z-index: 1051; /* Even higher than navbar if needed to ensure clickability */
+}
+
+/* Navbar sidebar toggler hover effect */
+.navbar-toggler-sidebar:hover {
+    background: rgba(37, 99, 235, 0.1);
+    transform: scale(1.05);
+}
+
+/* Navbar navigation links */
+.navbar .nav-link {
+    color: #64748b !important; /* Muted grey text */
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+/* Navbar navigation link hover effect */
+.navbar .nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Dropdown menu styling */
+.dropdown-menu {
+    border: none;
+    box-shadow: var(--card-shadow-lg);
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0;
+}
+
+/* Dropdown item styling */
+.dropdown-item {
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+/* Dropdown item hover effect */
+.dropdown-item:hover {
+    background: var(--light-bg);
+    color: var(--primary-color);
+}
+
+/* Main Content Area */
+main {
+    flex: 1; /* Takes up remaining vertical space */
+    padding: 2rem;
+    background: white;
+    margin: 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    min-height: calc(100vh - var(--navbar-height) - 2rem); /* Ensures content area fills remaining height */
+}
+
+/* Flash Messages Container */
+.flash-messages-container {
+    position: fixed;
+    top: var(--navbar-height); /* Position below navbar */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%; /* Responsive width */
+    max-width: 500px; /* Max width on larger screens */
+    z-index: 1060; /* Ensure it's above other elements like modals */
+    pointer-events: none; /* Allows clicks to pass through empty space */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally */
+    padding: 0 1rem; /* Added horizontal padding to container itself */
+}
+.flash-message-item {
+    pointer-events: all; /* Re-enable pointer events for the alert itself */
+    margin-bottom: 10px; /* Space between multiple alerts */
+    border-radius: var(--border-radius); /* Consistent rounded corners */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+    padding: 0.8rem 1.2rem; /* Adjusted padding for a more compact look */
+    font-size: 0.95rem; /* Slightly smaller font for compactness */
+    opacity: 0.98; /* Almost opaque */
+    transition: opacity 0.5s ease-out, transform 0.3s ease; /* Smooth fade-out and slight lift */
+    width: 100%; /* Take full width of its container */
+    display: flex;
+    align-items: center;
+}
+.flash-message-item .btn-close {
+    filter: invert(1); /* Ensures close button is visible on colored backgrounds */
+    opacity: 0.8;
+    margin-left: auto; /* Push close button to the right */
+}
+
+
+.alert {
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--card-shadow);
+}
+
+/* Specific alert type colors and gradients */
+.alert-success {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    color: #166534;
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fef2f2, #fecaca);
+    color: #991b1b;
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fffbeb, #fed7aa);
+    color: #92400e;
+    border-left: 4px solid var(--warning-color);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #f0f9ff, #bae6fd);
+    color: #0c4a6e;
+    border-left: 4px solid var(--info-color);
+}
+
+/* Button Styles */
+.btn {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+/* Primary button gradient and hover */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Success button gradient and hover */
+.btn-success {
+    background: linear-gradient(135deg, var(--success-color), #15803d);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(22, 163, 74, 0.3);
+}
+
+/* Warning button gradient and hover */
+.btn-warning {
+    background: linear-gradient(135deg, var(--warning-color), #c2410c);
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(217, 119, 6, 0.3);
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-lg);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--light-bg), #f1f5f9);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    font-weight: 600;
+}
+
+/* Custom Gradient Card Backgrounds (NEW) */
+.bg-gradient-primary-card {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+.bg-gradient-success-card {
+    background: linear-gradient(135deg, var(--success-color), #15803d); /* Darker green */
+}
+.bg-gradient-info-card {
+    background: linear-gradient(135deg, var(--info-color), #0e7490); /* Darker cyan */
+}
+.card-header-gradient { /* For headers that should also be gradient */
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white; /* Ensure text is white on dark gradient headers */
+}
+
+
+/* Floating Action Button (FAB) */
+.financial-advice-fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    box-shadow: var(--card-shadow-lg);
+    border: none;
+    background: linear-gradient(135deg, #f59e0b, #d97706); /* Orange gradient */
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 50px; /* Pill shape */
+    display: inline-flex; /* Ensures content centers */
+    align-items: center;
+    justify-content: center;
+}
+
+.financial-advice-fab:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.4);
+    color: white; /* Keep text white on hover */
+}
+
+/* Footer Styles */
+.footer {
+    background: var(--light-bg);
+    border-top: 1px solid #e2e8f0;
+    margin-top: auto; /* Pushes footer to the bottom */
+}
+
+/* Modal Styles (for Alerts Modal) */
+.modal-content {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow-lg);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--dark-bg), #1e293b);
+    border-bottom: none;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+/* Alerts Bell Icon in Navbar */
+.position-relative .badge {
+    font-size: 0.7rem;
+}
+
+#alertsButton {
+    transition: all 0.3s ease;
+}
+
+#alertsButton:hover {
+    transform: scale(1.1);
+    color: var(--warning-color) !important; /* Change color on hover */
+}
+
+/* Alert Badge Positioning */
+#alertBadge {
+    top: -2px; /* Move it slightly up */
+    right: -8px; /* Position it relative to the right edge of the button */
+    padding: .3em .6em; /* Slightly smaller badge */
+    font-size: .7em; /* Smaller font size */
+    white-space: nowrap; /* Prevent number from wrapping */
+}
+
+/* Alerts Modal positioning and sizing */
+#alertsModal .modal-dialog {
+    position: fixed;
+    top: var(--navbar-height); /* Position below the navbar */
+    right: 1rem; /* Adjust distance from the right edge */
+    margin: 0; /* Remove default margins */
+    max-width: 400px; /* Smaller max-width */
+    width: auto; /* Allow width to adjust based on content up to max-width */
+    transform: translateX(0); /* Ensure no horizontal transform by default */
+    /* opacity: 0; */ /* Start invisible */
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    pointer-events: none; /* Allow clicks to pass through when hidden */
+}
+
+#alertsModal.show .modal-dialog {
+    transform: translateY(0) translateX(0); /* No transform when shown */
+    opacity: 1; /* Fully visible */
+    pointer-events: auto; /* Enable clicks when shown */
+}
+
+#alertsModal .modal-content {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2); /* Stronger shadow for pop-up effect */
+    border: none; /* Remove default border */
+}
+
+
+/* Alert styles within the modal body */
+#alertsModalBody {
+    max-height: 400px; /* Set a maximum height for the modal body */
+    overflow-y: auto; /* Add vertical scrollbar when content exceeds max-height */
+    padding: 1rem; /* Add some padding inside the scrollable area */
+}
+
+.alert.alert-read {
+    opacity: 0.6; /* Make them slightly transparent */
+    background-color: #e9ecef; /* A subtle grey background */
+    color: #6c757d; /* Dim the text color */
+    border-color: #ced4da; /* Dim the border color */
+}
+
+.delete-button {
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-button:hover {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.delete-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    /* On mobile, sidebar is initially hidden (off-screen) */
+    .sidebar {
+        width: var(--sidebar-full-width); /* Maintain full width for mobile show */
+        transform: translateX(-100%); /* Start off-screen */
+    }
+
+    /* When 'show' class is applied via JS, slide it into view */
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    /* Main content wrapper always at 0 margin on mobile (sidebar overlays) */
+    .main-content-wrapper {
+        margin-left: 0;
+    }
+    /* No sidebar-collapsed-view needed on mobile as sidebar fully hides */
+
+    main {
+        margin: 0.5rem; /* Smaller margins for main content */
+        padding: 1rem; /* Smaller padding */
+        border-radius: 0; /* No border-radius on small screens for full width */
+    }
+
+    .financial-advice-fab {
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        border-radius: 8px; /* Slightly less rounded for mobile button */
+    }
+
+    .financial-advice-fab .d-sm-inline {
+        display: none !important; /* Hide long text on small screens */
+    }
+
+    .financial-advice-fab .d-sm-none {
+        display: inline !important; /* Show short text on small screens */
+    }
+
+    /* Adjust alerts modal position for mobile */
+    #alertsModal .modal-dialog {
+        top: auto; /* Remove fixed top for smaller screens */
+        bottom: 1rem; /* Position at bottom for better mobile UX */
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+        width: auto;
+        transform: translateY(100%); /* Slide from bottom for mobile */
+    }
+
+    #alertsModal.show .modal-dialog {
+        transform: translateY(0);
+    }
+
+    /* Flash messages container for mobile */
+    .flash-messages-container {
+        width: 95%; /* Adjust width for smaller screens */
+        top: calc(var(--navbar-height) + 10px); /* Slightly lower than on desktop relative to navbar */
+    }
+
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.25rem; /* Smaller brand font on very small screens */
+    }
+
+    main {
+        padding: 0.75rem; /* Even smaller padding */
+    }
+}
+
+/* Animations */
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* This is for mobile, when sidebar moves from off-screen to on-screen */
+.sidebar.show {
+    animation: none; /* Removed animation here, already handled by transition */
+}
+
+
+/* Scrollbar Styling for Webkit browsers (Chrome, Safari, Edge) */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3); /* Light grey semi-transparent thumb */
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5); /* Darker on hover */
+}
+
+/* Additional Utility Classes */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}

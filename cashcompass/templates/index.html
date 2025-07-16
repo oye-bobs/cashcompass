@@ -1,0 +1,481 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block main %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
+
+    <div class="container py-4">
+        <h2 class="text-3xl font-bold text-center text-gradient mb-5">Your Financial Dashboard</h2>
+
+        {# Month Selector - Moved to the top and styled #}
+        <div class="d-flex justify-content-end mb-5">
+            <form action="/" method="get" class="d-flex align-items-center rounded-pill month-selector-container">
+                <label for="month-select" class="form-label me-3 my-auto month-selector-label">Select Month:</label>
+                <select name="month" id="month-select" class="form-select form-select-sm rounded-pill border-0 month-select-dropdown" onchange="this.form.submit()">
+                    {% for month_val, month_label in available_months %}
+                        <option value="{{ month_val }}" {% if month_val == selected_month %}selected{% endif %}>
+                            {{ month_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        {# Summary Cards #}
+        <div class="row g-4 mb-5">
+            <div class="col-md-6 col-lg-3">
+                <a href="/income" class="text-decoration-none d-block h-100"> {# Added h-100 to anchor for consistent height #}
+                    <div class="card shadow-lg text-center p-5 rounded-xl h-100 bg-gradient-income glass-effect animate-card-hover">
+                        <h5 class="card-summary-title">Total Income</h5>
+                        <p class="card-summary-value" data-raw-value="{{ total_income }}"></p>
+                        <i class="fas fa-dollar-sign text-white-50 card-summary-icon"></i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a href="/expenses" class="text-decoration-none d-block h-100"> {# Added h-100 to anchor for consistent height #}
+                    <div class="card shadow-lg text-center p-5 rounded-xl h-100 bg-gradient-expenses glass-effect animate-card-hover">
+                        <h5 class="card-summary-title">Total Expenses</h5>
+                        <p class="card-summary-value" data-raw-value="{{ total_expenses }}"></p>
+                        <i class="fas fa-receipt text-white-50 card-summary-icon"></i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a class="text-decoration-none d-block h-100"> {# Added h-100 to anchor for consistent height. Assuming net_balance might have a page. #}
+                    <div class="card shadow-lg text-center p-5 rounded-xl h-100 bg-gradient-net-balance glass-effect animate-card-hover">
+                        <h5 class="card-summary-title">Net Balance</h5>
+                        <p class="card-summary-value" data-raw-value="{{ net_balance }}"></p>
+                        <i class="fas fa-wallet text-white-50 card-summary-icon"></i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a href="/savings" class="text-decoration-none d-block h-100"> {# Added h-100 to anchor for consistent height #}
+                    <div class="card shadow-lg text-center p-5 rounded-xl h-100 bg-gradient-savings text-white glass-effect animate-card-hover">
+                        <h5 class="card-summary-title">Total Savings</h5>
+                        <p class="card-summary-value" data-raw-value="{{ total_savings }}"></p>
+                        <i class="fas fa-piggy-bank text-white-50 card-summary-icon"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {# Button to Savings Dashboard #}
+        <div class="text-center mb-5">
+            <a href="/savings_dashboard" class="btn btn-primary btn-lg rounded-pill animate-hover-lift">
+                <i class="fas fa-chart-line me-2"></i> View Savings & Financial Health Overview
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {# Budget vs. Actual Spending - Bar Chart & List #}
+            <div class="col-lg-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect">
+                    <div class="card-header card-header-chart-gradient rounded-t-xl py-3">
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-chart-bar me-2"></i> Budget vs. Actual Spending for {{ selected_month_display }}</h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        {% if budget_bar_labels %}
+                            <div class="chart-container">
+                                <canvas id="budgetVsActualChart"></canvas>
+                            </div>
+                            <hr class="my-4 border-primary">
+                            <h6 class="mb-3 fw-bold text-primary">Detailed Breakdown:</h6>
+                            <ul class="list-group list-group-flush flex-grow-1 overflow-auto border rounded-lg">
+                                {% for category, data in budget_vs_actual.items() %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                    <div>
+                                        <strong>{{ category }}</strong>
+                                        <small class="text-muted d-block">Budgeted: <span class="currency-display" data-raw-value="{{ data.budgeted }}"></span></small>
+                                    </div>
+                                    <span class="fs-6">
+                                        Spent: <span class="currency-display" data-raw-value="{{ data.spent }}"></span> |
+                                        Remaining: <span class="currency-display" data-raw-value="{{ data.remaining }}"></span>
+                                        {% if data.remaining < 0 %}
+                                            <span class="badge bg-danger ms-2">Over Budget</span>
+                                        {% elif data.spent > 0 and data.remaining > 0 %}
+                                            <span class="badge bg-warning ms-2">Progress</span>
+                                        {% endif %}
+                                    </span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-5 my-auto">No budget or expense data available for {{ selected_month_display }}.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {# Top Spending Categories - Pie Chart #}
+            <div class="col-lg-6">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect">
+                    <div class="card-header card-header-chart-gradient rounded-t-xl py-3">
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-chart-pie me-2"></i> Top Spending Categories for {{ selected_month_display }}</h5>
+                    </div>
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        {% if pie_chart_data %}
+                            <div class="chart-container d-flex justify-content-center align-items-center">
+                                <canvas id="topExpensesPieChart"></canvas>
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-5 my-auto">No expense data available to display categories for {{ selected_month_display }}.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Income vs. Expenses - Line Chart #}
+        <div class="row g-4 mt-4">
+            <div class="col-12">
+                <div class="card shadow-lg h-100 rounded-xl glass-effect">
+                    <div class="card-header card-header-chart-gradient rounded-t-xl py-3">
+                        <h5 class="card-title mb-0 fw-bold"><i class="fas fa-chart-line me-2"></i> Income vs. Expenses for {{ selected_month_display }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4 d-flex flex-wrap justify-content-center gap-3">
+                            <span class="badge bg-gradient-income text-white p-2 px-3 fs-6 rounded-pill shadow-sm">
+                                Total Income: <span class="currency-display" data-raw-value="{{ monthly_income_total }}"></span>
+                            </span>
+                            <span class="badge bg-gradient-expenses text-white p-2 px-3 fs-6 rounded-pill shadow-sm">
+                                Total Expenses: <span class="currency-display" data-raw-value="{{ monthly_expenses_total }}"></span>
+                            </span>
+                        </div>
+
+                        {% if line_chart_labels and (monthly_income_total > 0 or monthly_expenses_total > 0) %}
+                            <div class="chart-container">
+                                <canvas id="monthlyIncomeExpensesChart"></canvas>
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted fs-5 py-5 my-auto">No income or expense data available for {{ selected_month_display }}.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to format numbers as currency without .00 if it's a whole number
+            function formatCurrency(value) {
+                if (value === undefined || value === null || isNaN(value)) {
+                    return '$0';
+                }
+                const numberValue = parseFloat(value);
+                // Check if it's a whole number
+                if (numberValue % 1 === 0) {
+                    return new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0, // No decimal digits for whole numbers
+                        maximumFractionDigits: 0
+                    }).format(numberValue);
+                } else {
+                    return new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 2, // Always show 2 decimal digits for non-whole numbers
+                        maximumFractionDigits: 2
+                    }).format(numberValue);
+                }
+            }
+
+            // Function to find all elements with data-raw-value and format them
+            function formatCurrencyDisplays() {
+                // For main summary values (card-summary-value)
+                document.querySelectorAll('.card-summary-value').forEach(element => {
+                    const rawValue = parseFloat(element.getAttribute('data-raw-value'));
+                    element.textContent = formatCurrency(rawValue);
+                });
+                // For other currency displays (e.g., within lists, badges)
+                document.querySelectorAll('.currency-display').forEach(element => {
+                    const rawValue = parseFloat(element.getAttribute('data-raw-value'));
+                    element.textContent = formatCurrency(rawValue);
+                });
+            }
+
+            // Call formatting function on DOMContentLoaded
+            formatCurrencyDisplays();
+
+            // Data passed from Flask backend
+            const budgetBarLabels = JSON.parse('{{ budget_bar_labels | tojson }}');
+            const budgetedData = JSON.parse('{{ budgeted_data | tojson }}');
+            const spentData = JSON.parse('{{ spent_data | tojson }}');
+            const pieChartLabels = JSON.parse('{{ pie_chart_labels | tojson }}');
+            const pieChartData = JSON.parse('{{ pie_chart_data | tojson }}');
+            const lineChartLabels = JSON.parse('{{ line_chart_labels | tojson }}');
+            const lineChartIncomeData = JSON.parse('{{ line_chart_income_data | tojson }}');
+            const lineChartExpensesData = JSON.parse('{{ line_chart_expenses_data | tojson }}');
+
+            // Global Chart.js defaults for consistent fonts, tooltips, etc.
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = '#4a5568'; // Default text color for charts
+            Chart.defaults.plugins.tooltip.padding = 10;
+            Chart.defaults.plugins.tooltip.cornerRadius = 8;
+            Chart.defaults.plugins.tooltip.bodyFont.size = 14;
+            Chart.defaults.plugins.tooltip.titleFont.size = 16;
+            Chart.defaults.plugins.tooltip.displayColors = true;
+
+
+            // --- Budget vs. Actual Bar Chart ---
+            const budgetCtx = document.getElementById('budgetVsActualChart');
+            if (budgetCtx && budgetBarLabels.length > 0) { // Only render if data exists
+                new Chart(budgetCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: budgetBarLabels,
+                        datasets: [
+                            {
+                                label: 'Budgeted',
+                                data: budgetedData,
+                                backgroundColor: 'rgba(75, 192, 192, 0.8)', // Teal
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1,
+                                borderRadius: 5 // Rounded bars
+                            },
+                            {
+                                label: 'Spent',
+                                data: spentData,
+                                backgroundColor: 'rgba(255, 99, 132, 0.8)', // Red
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1,
+                                borderRadius: 5 // Rounded bars
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Important for controlling height via parent container
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount ($)',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    },
+                                    color: '#334155'
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.08)' // Lighter grid lines
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value); // Use new formatCurrency function
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.08)' // Lighter grid lines
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: false, // Title handled by card-header
+                            },
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true, // Use circles for legend items
+                                    padding: 20
+                                }
+                            },
+                            tooltip: { // Added tooltips for better data on hover
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += formatCurrency(context.parsed.y); // Use new formatCurrency function
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Top Expenses Pie Chart ---
+            const pieCtx = document.getElementById('topExpensesPieChart');
+            if (pieCtx && pieChartData.length > 0) { // Only render if data exists
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: pieChartLabels,
+                        datasets: [{
+                            data: pieChartData,
+                            backgroundColor: [
+                                '#FF6384', // Red
+                                '#36A2EB', // Blue
+                                '#FFCE56', // Yellow
+                                '#4BC0C0', // Green
+                                '#9966FF', // Purple
+                                '#FF9F40'  // Orange
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 2, // Thicker border for segments
+                            hoverOffset: 10 // Lift segment on hover
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Important for controlling height via parent container
+                        plugins: {
+                            title: {
+                                display: false, // Title handled by card-header
+                            },
+                            legend: {
+                                position: 'right', // Or 'top', 'bottom', 'left'
+                                labels: {
+                                    usePointStyle: true, // Use circles for legend items
+                                    padding: 20
+                                }
+                            },
+                            tooltip: { // Added tooltips
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += formatCurrency(context.parsed); // Use new formatCurrency function
+                                            // Add percentage to tooltip
+                                            const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                            const percentage = (context.parsed / total * 100).toFixed(2);
+                                            label += ` (${percentage}%)`;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Income vs. Expenses Line Chart ---
+            const lineCtx = document.getElementById('monthlyIncomeExpensesChart');
+            // Condition for displaying chart: must have labels AND at least one of the totals must be > 0
+            if (lineCtx && lineChartLabels.length > 0) {
+                new Chart(lineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: lineChartLabels,
+                        datasets: [
+                            {
+                                label: 'Income',
+                                data: lineChartIncomeData,
+                                borderColor: '#28a745', // Green
+                                backgroundColor: 'rgba(40, 167, 69, 0.3)', // Semi-transparent Green for fill
+                                fill: true,
+                                tension: 0.4, // Smooth curves
+                                pointRadius: 6,
+                                pointBackgroundColor: '#28a745',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointHoverRadius: 8,
+                                pointHoverBackgroundColor: '#28a745',
+                                pointHoverBorderColor: '#fff',
+                            },
+                            {
+                                label: 'Expenses',
+                                data: lineChartExpensesData,
+                                borderColor: '#dc3545', // Red
+                                backgroundColor: 'rgba(220, 53, 69, 0.3)', // Semi-transparent Red for fill
+                                fill: true,
+                                tension: 0.4, // Smooth curves
+                                pointRadius: 6,
+                                pointBackgroundColor: '#dc3545',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointHoverRadius: 8,
+                                pointHoverBackgroundColor: '#dc3545',
+                                pointHoverBorderColor: '#fff',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount ($)',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    },
+                                    color: '#334155'
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.08)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value); // Use new formatCurrency function
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.08)'
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: false,
+                            },
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += formatCurrency(context.parsed.y); // Use new formatCurrency function
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}
