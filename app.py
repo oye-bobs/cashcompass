@@ -38,7 +38,7 @@ Session(app)
 
 # Configure Database for PostgreSQL using Flask-SQLAlchemy
 # The DATABASE_URL will come from your .env file
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_PRIVATE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False # Suppresses a warning
 db = SQLAlchemy(app) # Initialize SQLAlchemy instance
 
