@@ -221,7 +221,7 @@ Visit: [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
 ## Technologies Used
 
 - **Backend**: Flask (Python)
-- **Database**: SQLite (via CS50's SQL helper)
+- **Database**: PostGRE SQL
 - **Frontend**: HTML, CSS, JavaScript (Bootstrap 5, Font Awesome)
 - **AI Integration**: Google Gemini API
 - **Environment Management**: python-dotenv
